@@ -1,82 +1,66 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ShoppingBag,
-  SlidersHorizontal,
   Package,
   Users,
-  BarChart3,
-  Share2,
   Trash2,
   Plus,
   Edit,
-  Eye,
   MessageCircle,
   ShieldCheck,
   Truck,
-  ArrowRight,
   X,
   Search,
   Copy,
-  Settings,
   Palette,
-  Scale,
-  Sliders,
-  ChevronDown,
-  Layers,
-  Sparkles,
-  RefreshCw,
-  MapPin,
-  Check,
-  Lock,
-  Unlock,
   User,
-  LogOut,
-  Mail,
   Key,
-  ShieldAlert,
   DollarSign,
-  TrendingUp,
   CreditCard,
-  Bell,
-  Clock,
   Send,
-  MessageSquare,
   Activity,
-  CheckCircle2,
-  AlertTriangle,
   FileSpreadsheet,
   Percent,
   Wallet,
-  Smartphone,
-  ExternalLink,
-  ChevronRight,
   Printer,
-  QrCode,
-  Barcode,
-  Sun,
-  Moon,
-  Compass
+  QrCode
 } from 'lucide-react';
 
-// --- MASTER OWNER CREDENTIALS ---
+// --- بيانات اعتماد المالك الرسمي ---
 const OWNER_EMAIL = 'gotrack777@gmail.com';
 const OWNER_PASS = '123456789';
 
-// --- EGYPTIAN GOVERNORATES ---
+// شعار الإنفينيتي المصمم برمجياً كـ SVG نقي عالي الدقة
+const InfinityLogo = ({ className = "w-7 h-7 mx-1 inline-block" }) => (
+  <svg
+    viewBox="0 0 100 50"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    stroke="currentColor"
+    strokeWidth="7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M30 25 C30 15, 10 15, 10 25 C10 35, 30 35, 50 25 C70 15, 90 15, 90 25 C90 35, 70 35, 50 25 Z" />
+  </svg>
+);
+
+// --- محافظات مصر وتكاليف الشحن ---
 const EGYPT_GOVERNORATES = [
-  { id: 'cairo', name: 'Cairo (Ø§Ù„Ù‚Ø§Ù‡Ø±Ø©)', defaultCost: 60 },
-  { id: 'giza', name: 'Giza / Zayed / 6th Oct (Ø§Ù„Ø¬ÙŠØ²Ø©)', defaultCost: 60 },
-  { id: 'alex', name: 'Alexandria (Ø§Ù„Ø¥Ø³ÙƒÙ†Ø¯Ø±ÙŠØ©)', defaultCost: 75 },
-  { id: 'delta', name: 'Delta & Lower Egypt (Ø§Ù„Ø¯Ù„ØªØ§ ÙˆØ§Ù„ÙˆØ¬Ù‡ Ø§Ù„Ø¨Ø­Ø±ÙŠ)', defaultCost: 80 },
-  { id: 'canal', name: 'Canal Cities (Ù…Ø¯Ù† Ø§Ù„Ù‚Ù†Ø§Ø©)', defaultCost: 85 },
-  { id: 'upper', name: 'Upper Egypt (Ø§Ù„ØµØ¹ÙŠØ¯)', defaultCost: 100 }
+  { id: 'cairo', name: 'القاهرة (Cairo)', defaultCost: 60 },
+  { id: 'giza', name: 'الجيزة / زايد / أكتوبر (Giza)', defaultCost: 60 },
+  { id: 'alex', name: 'الإسكندرية (Alexandria)', defaultCost: 75 },
+  { id: 'delta', name: 'الدلتا والوجه البحري (Delta)', defaultCost: 80 },
+  { id: 'canal', name: 'مدن القناة (Canal Cities)', defaultCost: 85 },
+  { id: 'upper', name: 'الصعيد (Upper Egypt)', defaultCost: 100 }
 ];
 
-// --- INITIAL EDITORIAL THEME CONTENT ---
+// --- محتوى المظهر التحريري (ZARA EDITORIAL) ---
 const INITIAL_THEME_CONFIG = {
   tickerEnabled: true,
   tickerText: 'EDITORIAL DROP 01 / HEAVYWEIGHT EGYPTIAN COTTON / FREE DOORSTEP FITTING',
-  tickerArabicBadge: 'Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆÙ‚ÙŠØ§Ø³ Ù…Ø¬Ø§Ù†ÙŠ Ù…Ø¹ Ø§Ù„Ù…Ù†Ø¯ÙˆØ¨ Ù‚Ø¨Ù„ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù…',
+  tickerArabicBadge: 'معاينة وقياس مجاني مع المندوب قبل الاستلام',
   heroPreBadge: 'AUTUMN / WINTER 2026',
   heroHeading: 'ARCHITECTURAL DRAPE',
   heroSubheading: 'Heavyweight 460 GSM combed cotton sculpted in oversized streetwear cuts. Pure monochrome presence.',
@@ -86,7 +70,7 @@ const INITIAL_THEME_CONFIG = {
   editorialImage: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1800&q=85'
 };
 
-// --- INITIAL PRODUCTS CATALOG ---
+// --- كتالوج المنتجات الأصلي ---
 const INITIAL_PRODUCTS = [
   {
     id: 'loom-01',
@@ -104,8 +88,8 @@ const INITIAL_PRODUCTS = [
     sizes: ['M/L', 'L/XL'],
     image: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?auto=format&fit=crop&w=1200&q=85',
     detailImage: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1000&q=80',
-    description: 'Double-faced structured hood silhouette with continuous typographic âˆž run on leg and hood contour. Preshrunk Egyptian combed cotton.',
-    highlight: 'ÙˆÙØ± 200 Ø¬ Ø¹Ù†Ø¯ Ø·Ù„Ø¨ Ø§Ù„Ø·Ù‚Ù… Ø§Ù„ÙƒØ§Ù…Ù„'
+    description: 'طقم كامل يتكون من هودي وبنطال بقصة أوفرسايز معمارية مريحة، خامة ميلتون قطن مصري ممشط 460 جرام معالج ضد الانكماش.',
+    highlight: 'وفر 200 ج عند طلب الطقم الكامل'
   },
   {
     id: 'loom-02',
@@ -123,8 +107,8 @@ const INITIAL_PRODUCTS = [
     sizes: ['M/L', 'L/XL'],
     image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=85',
     detailImage: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1000&q=80',
-    description: 'Clean seamless neckline and minimalist kangaroo volume. High-density tonal puff print at rear spinal axis.',
-    highlight: 'Ø§Ù„Ø£Ø¹Ù„Ù‰ Ø·Ù„Ø¨Ø§Ù‹ Ù„Ù„ÙƒÙˆÙ„ÙƒØ´Ù† Ø§Ù„Ø­Ø§Ù„ÙŠ'
+    description: 'هودي ثقيل بكتف ساقط، كابيشون مبطن بطبقتين مع جيب كانغرو مخفي وتطريز رمزي كثيف على الظهر.',
+    highlight: 'الأعلى طلباً للكولكشن الحالي'
   },
   {
     id: 'loom-03',
@@ -142,8 +126,8 @@ const INITIAL_PRODUCTS = [
     sizes: ['M/L', 'L/XL'],
     image: 'https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=1200&q=85',
     detailImage: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?auto=format&fit=crop&w=1000&q=80',
-    description: 'Architectural wide leg cut cascading smoothly over footwear. Gunmetal-tipped cotton cord.',
-    highlight: 'Ù‚ØµØ© Ø§Ù†Ø³ÙŠØ§Ø¨ÙŠØ© Ù…Ø±ÙŠØ­Ø© Ù…Ø¹ Ø³Ù†ÙŠÙƒØ±Ø²'
+    description: 'بنطال ميلتون بأرجل مستقيمة واسعة تتدفق فوق الأحذية الرياضية مع حبل شد قطني عريض وأطراف معدنية غير لامعة.',
+    highlight: 'قصة انسيابية مريحة مع سنيكرز'
   },
   {
     id: 'loom-04',
@@ -161,16 +145,16 @@ const INITIAL_PRODUCTS = [
     sizes: ['M/L', 'L/XL'],
     image: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=85',
     detailImage: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=1000&q=80',
-    description: 'Reinforced 1x1 ribbed high collar with signature micro-infinity tonal chest embroidery.',
-    highlight: 'Ø®Ø§Ù…Ø© Ù…ØªÙ…Ø§Ø³ÙƒØ© ÙˆÙ‚Ø·Ù† Ù…ØµØ±ÙŠ 100%'
+    description: 'تيشيرت بياقة مضلعة دائرية محكمة وقصة مربعة Boxy مع تطريز دقيق لشعار الإنفينيتي على الصدر.',
+    highlight: 'خامة متماسكة وقطن مصري 100%'
   }
 ];
 
-// --- HIERARCHICAL STAFF & PERFORMANCE DATA ---
+// --- فريق العمل ومصفوفة الصلاحيات ---
 const INITIAL_STAFF = [
   {
     id: 'staff-owner',
-    name: 'Master Director',
+    name: 'Ibrahim Bakry',
     email: OWNER_EMAIL,
     roleTitle: 'Master Owner / Executive Director',
     rank: 'Level 1: Executive',
@@ -238,117 +222,117 @@ const INITIAL_STAFF = [
   }
 ];
 
-// --- SHIPPING PARTNERS ---
+// --- شركات الشحن المعتمدة ---
 const INITIAL_COURIERS = [
   {
     id: 'bosta',
-    name: 'Bosta Express (Ø¨ÙˆØ³Ø·Ø©)',
+    name: 'Bosta Express (بوسطة)',
     active: true,
     isDefault: true,
-    sla: '24-48 Hours',
-    coverage: 'All Egypt (All Governorates)',
+    sla: '24-48 ساعة',
+    coverage: 'جميع محافظات مصر',
     rates: { cairo: 55, giza: 55, alex: 70, delta: 75, canal: 80, upper: 95 },
     collectedCodPending: 18450,
-    settlementCycle: 'Bi-Weekly Bank Transfer',
+    settlementCycle: 'تحويل بنكي نصف أسبوعي',
     phone: '01002233445'
   },
   {
     id: 'mylerz',
-    name: 'Mylerz Logistics',
+    name: 'Mylerz Logistics (مايلرز)',
     active: true,
     isDefault: false,
-    sla: 'Same Day / Next Day',
-    coverage: 'Greater Cairo & Alexandria',
+    sla: 'خلال 24 ساعة',
+    coverage: 'القاهرة الكبرى والإسكندرية',
     rates: { cairo: 60, giza: 60, alex: 75, delta: 85, canal: 90, upper: 110 },
     collectedCodPending: 7200,
-    settlementCycle: 'Weekly Automated Transfer',
+    settlementCycle: 'تحويل أسبوعي تلقائي',
     phone: '01123456789'
   },
   {
     id: 'aramex',
-    name: 'Aramex Domestic',
+    name: 'Aramex Domestic (أرامكس)',
     active: true,
     isDefault: false,
-    sla: '48 Hours',
-    coverage: 'Nationwide & Regional',
+    sla: '48 ساعة',
+    coverage: 'تغطية محلية شاملة',
     rates: { cairo: 75, giza: 75, alex: 90, delta: 95, canal: 100, upper: 125 },
     collectedCodPending: 3800,
-    settlementCycle: 'Monthly Consolidated Invoice',
+    settlementCycle: 'تسوية شهرية مجمعة',
     phone: '16999'
   }
 ];
 
-// --- PAYMENT CHANNELS ---
+// --- قنوات الدفع والتسوية ---
 const INITIAL_GATEWAYS = [
   {
     id: 'cod',
-    name: 'Cash On Delivery (Ø§Ù„Ø¯ÙØ¹ Ø¹Ù†Ø¯ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù… Ù…Ø¹ Ø§Ù„Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆØ§Ù„Ù‚ÙŠØ§Ø³)',
-    badge: '90% OF ORDERS',
-    description: 'Doorstep inspection and fitting allowed before settling payment with courier.',
+    name: 'الدفع عند الاستلام مع المعاينة والقياس (COD)',
+    badge: '90% من الطلبات',
+    description: 'يسمح بفتح الشحنة والقياس بحضور المندوب قبل دفع أي مبلغ.',
     active: true,
     feePercentage: 0
   },
   {
     id: 'instapay',
-    name: 'InstaPay Direct Transfer (Ø§Ù†Ø³ØªØ§Ø¨Ø§ÙŠ Ù…Ø¨Ø§Ø´Ø± Ø¨Ø¯ÙˆÙ† Ø¹Ù…ÙˆÙ„Ø§Øª)',
-    badge: 'INSTANT TRANSFER',
-    description: 'Instant settlement to IPA: loomstudios@instapay with photo proof upload.',
+    name: 'تحويل انستاباي فوري (InstaPay Direct)',
+    badge: 'تحويل فوري بدون رسوم',
+    description: 'تحويل مباشر وسريع إلى حساب المتجر الرسمي: loomstudios@instapay.',
     active: true,
     feePercentage: 0
   },
   {
     id: 'paymob',
-    name: 'Paymob Cards & Wallets (ÙÙŠØ²Ø§ / Ù…Ø§Ø³ØªØ±ÙƒØ§Ø±Ø¯ / Ù…Ø­Ø§ÙØ¸ Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠØ©)',
-    badge: 'ONLINE PAYMENT',
-    description: 'Accept credit/debit cards, Meeza, and mobile telecom wallets.',
+    name: 'بطاقات بنكية ومحافظ إلكترونية (Paymob)',
+    badge: 'دفع إلكتروني آمن',
+    description: 'دعم بطاقات فيزا، ماستركارد، ومحافظ فودافون كاش وأورنج كاش.',
     active: true,
     feePercentage: 2.75
   }
 ];
 
-// --- INITIAL ORDERS COLLECTION ---
+// --- سجل الطلبات الأولي ---
 const INITIAL_ORDERS = [
   {
     id: 'LM-9041',
-    customerName: 'Youssef El-Menshawy',
+    customerName: 'يوسف المنشاوي',
     phone: '01019876543',
-    city: 'New Cairo (Fifth Settlement)',
+    city: 'القاهرة الجديدة (التجمع الخامس)',
     governorate: 'cairo',
-    address: 'South Academy, Villa 18, 2nd Floor',
+    address: 'جنوب الأكاديمية، فيلا 18، الدور الثاني',
     items: [{ name: 'THE INFINITE COMPLETE TRACKSUIT (L/XL)', qty: 1, price: 899, cogs: 420 }],
     totalAmount: 954,
     shippingCost: 55,
     courierId: 'bosta',
     status: 'Pending Confirmation',
     assignedStaff: 'Sarah Nour',
-    paymentMethod: 'COD (Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆÙ‚ÙŠØ§Ø³ Ù…Ø¹ Ø§Ù„Ù…Ù†Ø¯ÙˆØ¨)',
-    date: 'Today, 10:40 AM',
+    paymentMethod: 'COD (معاينة وقياس مع المندوب)',
+    date: 'اليوم، 10:40 ص',
     waybillNumber: 'BST-8942-0199'
   },
   {
     id: 'LM-9040',
-    customerName: 'Farida Mostafa',
+    customerName: 'فريدة مصطفى',
     phone: '01155443322',
-    city: 'Giza (Sheikh Zayed)',
+    city: 'الجيزة (الشيخ زايد)',
     governorate: 'giza',
-    address: 'Beverly Hills, Compound 4, Apt 10',
+    address: 'كمبوند بيفرلي هيلز، بوابة 4',
     items: [{ name: 'HEAVYWEIGHT INFINITE HOODIE (M/L)', qty: 1, price: 550, cogs: 240 }],
     totalAmount: 605,
     shippingCost: 55,
     courierId: 'bosta',
     status: 'WhatsApp Verified',
     assignedStaff: 'Sarah Nour',
-    paymentMethod: 'COD (Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆÙ‚ÙŠØ§Ø³ Ù…Ø¹ Ø§Ù„Ù…Ù†Ø¯ÙˆØ¨)',
-    date: 'Yesterday, 06:15 PM',
+    paymentMethod: 'COD (معاينة وقياس مع المندوب)',
+    date: 'أمس، 06:15 م',
     waybillNumber: 'BST-8942-0198'
   },
   {
     id: 'LM-9039',
-    customerName: 'Karim Abdel-Aziz',
+    customerName: 'كريم عبد العزيز',
     phone: '01223344556',
-    city: 'Alexandria (Smouha)',
+    city: 'الإسكندرية (سموحة)',
     governorate: 'alex',
-    address: 'Fawzy Moaz St, Building 14',
+    address: 'شارع فوزي معاذ، عمارة 14',
     items: [
       { name: 'WIDE-LEG RELAXED INSEAM SWEATPANTS (M/L)', qty: 1, price: 440, cogs: 200 },
       { name: 'BOXY HEAVYWEIGHT EMBROIDERED TEE (M/L)', qty: 1, price: 320, cogs: 130 }
@@ -358,50 +342,43 @@ const INITIAL_ORDERS = [
     courierId: 'mylerz',
     status: 'Dispatched with Courier',
     assignedStaff: 'Karim El-Sayed',
-    paymentMethod: 'COD (Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆÙ‚ÙŠØ§Ø³ Ù…Ø¹ Ø§Ù„Ù…Ù†Ø¯ÙˆØ¨)',
-    date: 'Yesterday, 02:20 PM',
+    paymentMethod: 'COD (معاينة وقياس مع المندوب)',
+    date: 'أمس، 02:20 م',
     waybillNumber: 'MYL-2026-9039'
   },
   {
     id: 'LM-9038',
-    customerName: 'Nouran El-Gendy',
+    customerName: 'نوران الجندي',
     phone: '01099887766',
-    city: 'Cairo (Maadi)',
+    city: 'القاهرة (المعادي)',
     governorate: 'cairo',
-    address: 'Degla, St 218, Apt 4B',
+    address: 'دجلة، شارع 218، شقة 4B',
     items: [{ name: 'THE INFINITE COMPLETE TRACKSUIT (M/L)', qty: 1, price: 899, cogs: 420 }],
     totalAmount: 954,
     shippingCost: 55,
     courierId: 'bosta',
     status: 'Delivered & Collected',
     assignedStaff: 'Karim El-Sayed',
-    paymentMethod: 'COD (Collected by Courier)',
-    date: '2 Days Ago',
+    paymentMethod: 'COD (تم التحصيل من المندوب)',
+    date: 'منذ يومين',
     waybillNumber: 'BST-8942-0182'
   }
 ];
 
 export default function App() {
-  // Navigation & View Mode
   const [view, setView] = useState('store'); // 'store' | 'admin'
-  const [adminTab, setAdminTab] = useState('waybills'); // 'waybills' | 'performance' | 'revenue' | 'orders' | 'couriers' | 'gateways' | 'notifications' | 'products' | 'design' | 'staff'
+  const [adminTab, setAdminTab] = useState('waybills');
+  const [theme, setTheme] = useState('noir'); // 'noir' | 'ash' | 'blanc'
 
-  // Global Themes: 'noir' (Dark Luxury) | 'ash' (Editorial Gray) | 'blanc' (Crisp High-Fashion White)
-  const [theme, setTheme] = useState('noir');
-
-  // Master Authentication State
-  const [currentUser, setCurrentUser] = useState(INITIAL_STAFF[0]); // Master Owner
+  const [currentUser, setCurrentUser] = useState(INITIAL_STAFF[0]);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [loginForm, setLoginForm] = useState({ email: OWNER_EMAIL, password: OWNER_PASS });
   const [authError, setAuthError] = useState('');
 
-  // Waybill & Shipping Label Studio State
   const [activeWaybillOrder, setActiveWaybillOrder] = useState(INITIAL_ORDERS[0]);
   const [waybillFormat, setWaybillFormat] = useState('4x6'); // '4x6' | 'a4' | 'a6'
-  const [barcodeType, setBarcodeType] = useState('code128'); // 'code128' | 'qr'
-  const [isWaybillModalOpen, setIsWaybillModalOpen] = useState(false);
+  const [barcodeType, setBarcodeType] = useState('code128');
 
-  // Core Data Collections
   const [themeConfig, setThemeConfig] = useState(INITIAL_THEME_CONFIG);
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [orders, setOrders] = useState(INITIAL_ORDERS);
@@ -409,7 +386,6 @@ export default function App() {
   const [couriers, setCouriers] = useState(INITIAL_COURIERS);
   const [gateways, setGateways] = useState(INITIAL_GATEWAYS);
 
-  // Storefront Filtering & Bag State
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -419,14 +395,12 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Interactive Live Visitor Chat Simulation Widget
   const [isVisitorChatOpen, setIsVisitorChatOpen] = useState(false);
   const [visitorChatText, setVisitorChatText] = useState('');
   const [visitorMessages, setVisitorMessages] = useState([
-    { sender: 'bot', text: 'Ù…Ø±Ø­Ø¨Ø§Ù‹ Ø¨Ùƒ ÙÙŠ Ø§Ø³ØªÙˆØ¯ÙŠÙˆ LOOM ðŸ–¤. Ù‡Ù„ Ù„Ø¯ÙŠÙƒ Ø§Ø³ØªÙØ³Ø§Ø± Ø¨Ø®ØµÙˆØµ Ø§Ù„Ù…Ù‚Ø§Ø³Ø§Øª Ø£Ùˆ Ø®Ø§Ù…Ø© Ø§Ù„Ù…ÙŠÙ„ØªÙˆÙ† 460 GSMØŸ', time: '10:45 AM' }
+    { sender: 'bot', text: 'أهلاً بك في LOOM STUDIOS 🖤. هل ترغب في الاستفسار عن مقاسات الأوفرسايز أو خامة الميلتون 460 GSM؟', time: '10:45 ص' }
   ]);
 
-  // Express Cash On Delivery Checkout State
   const [checkoutData, setCheckoutData] = useState({
     name: '',
     phone: '',
@@ -437,7 +411,6 @@ export default function App() {
     paymentGateway: 'cod'
   });
 
-  // Size Calculator Sliders
   const [calcWeight, setCalcWeight] = useState(76);
   const [calcHeight, setCalcHeight] = useState(179);
 
@@ -457,7 +430,6 @@ export default function App() {
     return cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   }, [cart]);
 
-  // Selected courier and governorate rate
   const activeCourier = useMemo(() => {
     return couriers.find((c) => c.isDefault && c.active) || couriers.find((c) => c.active) || couriers[0];
   }, [couriers]);
@@ -467,7 +439,6 @@ export default function App() {
     return activeCourier.rates[checkoutData.governorate] || 60;
   }, [activeCourier, checkoutData.governorate]);
 
-  // Dynamic Theme Colors Class Resolvers
   const themeStyles = useMemo(() => {
     switch (theme) {
       case 'ash':
@@ -477,8 +448,7 @@ export default function App() {
           header: 'bg-[#1c1c1e]/90 border-neutral-700',
           subtext: 'text-neutral-400',
           highlight: 'bg-white text-black',
-          border: 'border-neutral-700',
-          pill: 'bg-neutral-800 text-neutral-200'
+          border: 'border-neutral-700'
         };
       case 'blanc':
         return {
@@ -487,8 +457,7 @@ export default function App() {
           header: 'bg-white/95 border-neutral-200 shadow-sm',
           subtext: 'text-neutral-600',
           highlight: 'bg-black text-white',
-          border: 'border-neutral-200',
-          pill: 'bg-neutral-100 text-neutral-800'
+          border: 'border-neutral-200'
         };
       case 'noir':
       default:
@@ -498,13 +467,11 @@ export default function App() {
           header: 'bg-black/90 border-neutral-900',
           subtext: 'text-neutral-400',
           highlight: 'bg-white text-black',
-          border: 'border-neutral-800',
-          pill: 'bg-neutral-900 text-neutral-300'
+          border: 'border-neutral-800'
         };
     }
   }, [theme]);
 
-  // Financial Calculations
   const financialMetrics = useMemo(() => {
     let grossSales = 0;
     let totalCogs = 0;
@@ -541,7 +508,6 @@ export default function App() {
     };
   }, [orders]);
 
-  // Authentication Submission
   const handleAuthSubmit = (e) => {
     e.preventDefault();
     setAuthError('');
@@ -549,11 +515,10 @@ export default function App() {
     if (loginForm.email.toLowerCase() === OWNER_EMAIL.toLowerCase() && loginForm.password === OWNER_PASS) {
       setCurrentUser(INITIAL_STAFF[0]);
       setShowAuthModal(false);
-      showToast(`MASTER OWNER AUTHENTICATED (${OWNER_EMAIL})`);
+      showToast(`تم تسجيل الدخول كمالك رئيسي (${OWNER_EMAIL})`);
       return;
     }
 
-    // Check existing staff
     const match = staff.find(
       (s) => s.email.toLowerCase() === loginForm.email.toLowerCase()
     );
@@ -561,21 +526,13 @@ export default function App() {
     if (match) {
       setCurrentUser(match);
       setShowAuthModal(false);
-      showToast(`AUTHENTICATED AS: ${match.name} [${match.roleTitle}]`);
+      showToast(`تم تسجيل الدخول: ${match.name} [${match.roleTitle}]`);
       return;
     }
 
-    setAuthError('Invalid credentials. For Owner, use: gotrack777@gmail.com with password: 123456789');
+    setAuthError('بيانات غير صحيحة. حساب المالك: gotrack777@gmail.com مع كلمة مرور: 123456789');
   };
 
-  // Switch to specific user role directly
-  const switchAccount = (member) => {
-    setCurrentUser(member);
-    setShowAuthModal(false);
-    showToast(`SWITCHED ROLE: ${member.name} (${member.roleTitle})`);
-  };
-
-  // Add item to bag
   const addToCart = (product, sizeChoice) => {
     const chosenSize = sizeChoice || product.sizes[0];
     const key = `${product.id}-${chosenSize}`;
@@ -598,22 +555,21 @@ export default function App() {
         }
       ]);
     }
-    showToast(`ADDED TO BAG: ${product.title} (${chosenSize})`);
+    showToast(`تمت الإضافة للحقيبة: ${product.title} (${chosenSize})`);
   };
 
   const removeFromCart = (key) => {
     setCart(cart.filter((i) => i.key !== key));
   };
 
-  // Place Order (Storefront Express COD)
   const handlePlaceOrder = (e) => {
     e.preventDefault();
     if (cart.length === 0) {
-      showToast('Your bag is currently empty.');
+      showToast('سلة التسوق فارغة.');
       return;
     }
     if (!checkoutData.name || !checkoutData.phone || !checkoutData.address) {
-      showToast('Please enter your full name, telephone, and delivery address.');
+      showToast('يرجى ملء الاسم الثلاثي ورقم الهاتف والعنوان بدقة.');
       return;
     }
 
@@ -636,11 +592,11 @@ export default function App() {
       assignedStaff: 'Sarah Nour',
       paymentMethod:
         checkoutData.paymentGateway === 'cod'
-          ? 'COD (Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆÙ‚ÙŠØ§Ø³ Ù…Ø¹ Ø§Ù„Ù…Ù†Ø¯ÙˆØ¨)'
+          ? 'COD (معاينة وقياس مع المندوب)'
           : checkoutData.paymentGateway === 'instapay'
           ? 'InstaPay Direct Transfer'
           : 'Card Payment (Paymob)',
-      date: 'Just Now',
+      date: 'الآن',
       waybillNumber
     };
 
@@ -649,10 +605,9 @@ export default function App() {
     setCart([]);
     setIsCartOpen(false);
 
-    showToast(`ORDER REGISTERED: #${newOrder.id}. Instant notification sent to Owner.`);
+    showToast(`تم تسجيل الطلب: #${newOrder.id}. تم إرسال إشعار فوري للمالك.`);
   };
 
-  // Filter products
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const matchCat = selectedCategory === 'all' || p.category === selectedCategory;
@@ -664,12 +619,11 @@ export default function App() {
     });
   }, [products, selectedCategory, searchQuery]);
 
-  // Visitor Chat reply
   const handleVisitorChatSend = (e) => {
     e.preventDefault();
     if (!visitorChatText.trim()) return;
 
-    const userMsg = { sender: 'user', text: visitorChatText, time: 'Just now' };
+    const userMsg = { sender: 'user', text: visitorChatText, time: 'الآن' };
     setVisitorMessages((prev) => [...prev, userMsg]);
     setVisitorChatText('');
 
@@ -678,8 +632,8 @@ export default function App() {
         ...prev,
         {
           sender: 'bot',
-          text: 'ØªÙ… Ø§Ø³ØªÙ„Ø§Ù… Ø§Ø³ØªÙØ³Ø§Ø±Ùƒ! Ø¬Ø§Ø±ÙŠ ØªØ­ÙˆÙŠÙ„Ùƒ Ù„Ø®Ø¯Ù…Ø© Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡ (Ø³Ø§Ø±Ø© Ù†ÙˆØ±) Ù„ØªØ£ÙƒÙŠØ¯ Ø§Ù„Ù…Ù‚Ø§Ø³Ø§Øª ÙˆØ§Ù„Ø´Ø­Ù† Ø¹Ø¨Ø± Ø§Ù„ÙˆØ§ØªØ³Ø§Ø¨.',
-          time: 'Just now'
+          text: 'تم استلام استفسارك! جاري تحويلك لخدمة العملاء (سارة نور) لتأكيد المقاسات والشحن عبر الواتساب.',
+          time: 'الآن'
         }
       ]);
     }, 700);
@@ -695,7 +649,7 @@ export default function App() {
         </div>
       )}
 
-      {/* TOP TICKER BAR */}
+      {/* شريط الإعلانات التحريري العلوي */}
       {themeConfig.tickerEnabled && (
         <aside aria-label="Announcement" className="border-b border-neutral-800/60 py-2 px-6 text-[10px] tracking-[0.25em] flex items-center justify-between font-mono uppercase bg-black/40">
           <div className="hidden md:flex items-center gap-2">
@@ -712,128 +666,51 @@ export default function App() {
               <Truck className="w-3 h-3" />
               <span>COURIER: {activeCourier.name.split(' ')[0]}</span>
             </span>
-            <span>â€¢</span>
-            <span className="font-sans tracking-normal text-neutral-400">Ø®Ø¯Ù…Ø© Ø¹Ù…Ù„Ø§Ø¡ ÙˆÙ‚ÙŠØ§Ø³ Ù…Ù†Ø²Ù„ÙŠ</span>
+            <span>•</span>
+            <span className="font-sans tracking-normal text-neutral-400">خدمة عملاء وقياس منزلي</span>
           </div>
         </aside>
       )}
 
-      {/* PRIMARY EDITORIAL STICKY HEADER */}
+      {/* الهيدر التحريري - زارا ستايل مع شعار الإنفينيتي النقي */}
       <header className={`sticky top-0 z-40 ${themeStyles.header} backdrop-blur-md border-b transition-all duration-300`}>
         <div className="max-w-[1720px] mx-auto px-6 sm:px-10 h-20 flex items-center justify-between gap-6">
-          {/* Left: Minimal Category Navigation */}
           <nav className="hidden lg:flex items-center gap-7 text-[11px] font-mono tracking-[0.25em] uppercase text-neutral-400">
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`hover:opacity-100 transition cursor-pointer ${
-                selectedCategory === 'all' ? 'text-inherit font-bold border-b border-current pb-0.5' : 'opacity-70'
-              }`}
-            >
-              COLLECTION
-            </button>
-            <button
-              onClick={() => setSelectedCategory('sets')}
-              className={`hover:opacity-100 transition cursor-pointer ${
-                selectedCategory === 'sets' ? 'text-inherit font-bold border-b border-current pb-0.5' : 'opacity-70'
-              }`}
-            >
-              SUITS
-            </button>
-            <button
-              onClick={() => setSelectedCategory('hoodies')}
-              className={`hover:opacity-100 transition cursor-pointer ${
-                selectedCategory === 'hoodies' ? 'text-inherit font-bold border-b border-current pb-0.5' : 'opacity-70'
-              }`}
-            >
-              HOODIES
-            </button>
-            <button
-              onClick={() => setSelectedCategory('pants')}
-              className={`hover:opacity-100 transition cursor-pointer ${
-                selectedCategory === 'pants' ? 'text-inherit font-bold border-b border-current pb-0.5' : 'opacity-70'
-              }`}
-            >
-              TROUSERS
-            </button>
-            <button
-              onClick={() => setSelectedCategory('tees')}
-              className={`hover:opacity-100 transition cursor-pointer ${
-                selectedCategory === 'tees' ? 'text-inherit font-bold border-b border-current pb-0.5' : 'opacity-70'
-              }`}
-            >
-              BASICS
-            </button>
+            <button onClick={() => setSelectedCategory('all')} className={`transition cursor-pointer ${selectedCategory === 'all' ? 'text-inherit font-bold border-b border-current pb-0.5' : 'opacity-70 hover:opacity-100'}`}>COLLECTION</button>
+            <button onClick={() => setSelectedCategory('sets')} className={`transition cursor-pointer ${selectedCategory === 'sets' ? 'text-inherit font-bold border-b border-current pb-0.5' : 'opacity-70 hover:opacity-100'}`}>SUITS</button>
+            <button onClick={() => setSelectedCategory('hoodies')} className={`transition cursor-pointer ${selectedCategory === 'hoodies' ? 'text-inherit font-bold border-b border-current pb-0.5' : 'opacity-70 hover:opacity-100'}`}>HOODIES</button>
+            <button onClick={() => setSelectedCategory('pants')} className={`transition cursor-pointer ${selectedCategory === 'pants' ? 'text-inherit font-bold border-b border-current pb-0.5' : 'opacity-70 hover:opacity-100'}`}>TROUSERS</button>
+            <button onClick={() => setSelectedCategory('tees')} className={`transition cursor-pointer ${selectedCategory === 'tees' ? 'text-inherit font-bold border-b border-current pb-0.5' : 'opacity-70 hover:opacity-100'}`}>BASICS</button>
           </nav>
 
-          {/* Center: Iconic Stark Zara-Style LOOM Typography */}
+          {/* لوجو LOOM STUDIOS الأصلي مع علامة الإنفينيتي Vector */}
           <div
             onClick={() => setView('store')}
             className="cursor-pointer text-center group select-none flex flex-col items-center"
           >
-            <div className="text-3xl sm:text-4xl font-light tracking-[0.22em] font-serif flex items-center leading-none">
+            <div className="text-3xl sm:text-4xl font-light tracking-[0.25em] font-serif flex items-center leading-none">
               <span>L</span>
-              <span className="font-serif italic text-2xl sm:text-3xl mx-0.5 font-normal tracking-tight group-hover:rotate-180 transition-transform duration-700">
-                âˆž
-              </span>
-              <span>OM</span>
+              <InfinityLogo className="w-8 h-5 mx-0.5 group-hover:rotate-180 transition-transform duration-700" />
+              <span>M</span>
             </div>
             <span className="text-[8px] font-mono tracking-[0.45em] opacity-60 uppercase mt-1">
               STUDIOS
             </span>
           </div>
 
-          {/* Right: Theme Switcher, Search, Auth Status & Bag */}
+          {/* عناصر التحكم والثيم والولوج لحساب المالك */}
           <div className="flex items-center gap-3 sm:gap-4 font-mono text-[11px] tracking-[0.2em] uppercase">
-            {/* 3-THEMES DYNAMIC SWITCHER */}
             <div className="flex items-center border border-neutral-700/60 p-0.5 bg-black/30 rounded-sm">
-              <button
-                onClick={() => {
-                  setTheme('noir');
-                  showToast('THEME: NOIR (DEEP LUXURY DARK)');
-                }}
-                className={`px-2 py-1 text-[9px] transition ${
-                  theme === 'noir' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'
-                }`}
-                title="Noir: Deep Dark Mode"
-              >
-                NOIR
-              </button>
-              <button
-                onClick={() => {
-                  setTheme('ash');
-                  showToast('THEME: ASH (EDITORIAL MUTED GRAY)');
-                }}
-                className={`px-2 py-1 text-[9px] transition ${
-                  theme === 'ash' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'
-                }`}
-                title="Ash: Minimal Gray Mode"
-              >
-                ASH
-              </button>
-              <button
-                onClick={() => {
-                  setTheme('blanc');
-                  showToast('THEME: BLANC (HIGH-FASHION WHITE)');
-                }}
-                className={`px-2 py-1 text-[9px] transition ${
-                  theme === 'blanc' ? 'bg-black text-white font-bold' : 'text-neutral-400 hover:text-black'
-                }`}
-                title="Blanc: Stark White Mode"
-              >
-                BLANC
-              </button>
+              <button onClick={() => { setTheme('noir'); showToast('THEME: NOIR'); }} className={`px-2 py-1 text-[9px] transition ${theme === 'noir' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'}`}>NOIR</button>
+              <button onClick={() => { setTheme('ash'); showToast('THEME: ASH'); }} className={`px-2 py-1 text-[9px] transition ${theme === 'ash' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'}`}>ASH</button>
+              <button onClick={() => { setTheme('blanc'); showToast('THEME: BLANC'); }} className={`px-2 py-1 text-[9px] transition ${theme === 'blanc' ? 'bg-black text-white font-bold' : 'text-neutral-400 hover:text-black'}`}>BLANC</button>
             </div>
 
-            {/* Search Trigger */}
-            <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="opacity-70 hover:opacity-100 transition hidden sm:flex items-center gap-1.5 cursor-pointer"
-            >
+            <button onClick={() => setIsSearchOpen(!isSearchOpen)} className="opacity-70 hover:opacity-100 transition hidden sm:flex items-center gap-1.5 cursor-pointer">
               <Search className="w-3.5 h-3.5" />
               <span>SEARCH</span>
             </button>
 
-            {/* Authenticated User & Role Indicator */}
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setView(view === 'admin' ? 'store' : 'admin')}
@@ -844,26 +721,22 @@ export default function App() {
                 }`}
               >
                 <User className="w-3 h-3" />
-                <span className="hidden md:inline">
-                  {currentUser.isOwner ? 'MASTER OWNER' : currentUser.name.split(' ')[0]}
-                </span>
+                <span className="hidden md:inline">{currentUser.isOwner ? 'MASTER OWNER' : currentUser.name.split(' ')[0]}</span>
                 <span className="md:hidden">CMS</span>
               </button>
 
               <button
                 onClick={() => setShowAuthModal(true)}
                 className="p-1.5 border border-neutral-700/70 hover:border-white transition cursor-pointer"
-                title="Login / Switch Role"
+                title="تسجيل الدخول / تغيير الرتبة"
               >
                 <Key className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            {/* Shopping Bag Button */}
             <button
               onClick={() => setIsCartOpen(true)}
               className="relative opacity-80 hover:opacity-100 transition flex items-center gap-1.5 cursor-pointer"
-              aria-label="Shopping Bag"
             >
               <span className="hidden sm:inline">BAG</span>
               <span className="text-xs">[{cart.reduce((s, i) => s + i.quantity, 0)}]</span>
@@ -871,7 +744,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Search Overlay */}
         {isSearchOpen && (
           <div className="border-t border-neutral-800/80 bg-black/95 px-6 py-4 animate-fadeIn">
             <div className="max-w-2xl mx-auto flex items-center gap-3">
@@ -879,48 +751,31 @@ export default function App() {
               <input
                 type="text"
                 autoFocus
-                placeholder="TYPE TO SEARCH 460GSM, TRACKSUITS, HOODIES, TROUSERS..."
+                placeholder="ابحث عن هوديز، ترينجات كاملة، أو ميلتون 460 جرام..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-transparent text-xs font-mono tracking-[0.15em] uppercase text-white placeholder-neutral-600 focus:outline-none"
               />
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setIsSearchOpen(false);
-                }}
-                className="text-neutral-500 hover:text-white text-xs font-mono cursor-pointer"
-              >
-                CLOSE
+              <button onClick={() => { setSearchQuery(''); setIsSearchOpen(false); }} className="text-neutral-500 hover:text-white text-xs font-mono cursor-pointer">
+                إغلاق
               </button>
             </div>
           </div>
         )}
       </header>
 
-      {/* ========================================================================= */}
-      {/* AUTHENTICATION & ROLE SWITCHER MODAL */}
-      {/* ========================================================================= */}
+      {/* نافذة تسجيل الدخول وحسابات الإدارة */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-6">
           <div className="border border-neutral-800 bg-[#0e0e0e] max-w-lg w-full p-8 relative font-mono shadow-2xl text-white">
-            <button
-              onClick={() => setShowAuthModal(false)}
-              className="absolute top-6 right-6 text-neutral-400 hover:text-white cursor-pointer"
-            >
+            <button onClick={() => setShowAuthModal(false)} className="absolute top-6 right-6 text-neutral-400 hover:text-white cursor-pointer">
               <X className="w-5 h-5" />
             </button>
 
             <div className="text-center space-y-1.5 mb-6">
-              <span className="text-[10px] tracking-[0.3em] text-neutral-500 uppercase block">
-                LOOM ENTERPRISE ACCESS
-              </span>
-              <h3 className="font-serif text-2xl font-light tracking-[0.15em] text-white uppercase">
-                SECURITY CHECKPOINT
-              </h3>
-              <p className="text-xs text-neutral-400 font-sans">
-                Sign in with Master Owner credentials or test staff roles.
-              </p>
+              <span className="text-[10px] tracking-[0.3em] text-neutral-500 uppercase block">LOOM ENTERPRISE ACCESS</span>
+              <h3 className="font-serif text-2xl font-light tracking-[0.15em] text-white uppercase">SECURITY CHECKPOINT</h3>
+              <p className="text-xs text-neutral-400 font-sans">تسجيل دخول المالك الرسمي أو طاقم العمل.</p>
             </div>
 
             {authError && (
@@ -929,7 +784,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Quick 1-Click Master Owner Sign-In */}
             <div className="border border-amber-500/50 bg-amber-950/20 p-4 space-y-3 mb-6">
               <div className="flex items-center justify-between text-[10px] text-amber-300 uppercase tracking-widest font-bold">
                 <span>MASTER OWNER PRESET</span>
@@ -940,21 +794,17 @@ export default function App() {
                   setLoginForm({ email: OWNER_EMAIL, password: OWNER_PASS });
                   setCurrentUser(INITIAL_STAFF[0]);
                   setShowAuthModal(false);
-                  showToast(`LOGGED IN AS MASTER OWNER: ${OWNER_EMAIL}`);
+                  showToast(`تم تسجيل الدخول: ${OWNER_EMAIL}`);
                 }}
                 className="w-full py-3 bg-white text-black font-mono text-xs tracking-[0.15em] font-bold hover:bg-neutral-200 transition flex items-center justify-center gap-3 cursor-pointer"
               >
-                <span>SIGN IN AS {OWNER_EMAIL} (PW: 123456789)</span>
+                <span>دخول فوري بحساب المالك (gotrack777@gmail.com)</span>
               </button>
-              <div className="text-[10px] text-neutral-400 text-center font-sans">
-                Full authority: Waybill Studio, Net Revenue & COGS, Multi-Courier, Gateways.
-              </div>
             </div>
 
-            {/* Interactive Form for custom credentials */}
             <form onSubmit={handleAuthSubmit} className="space-y-3 border-t border-neutral-800 pt-4 mb-6">
               <div>
-                <label className="text-[10px] text-neutral-400 uppercase block mb-1">GMAIL ADDRESS</label>
+                <label className="text-[10px] text-neutral-400 uppercase block mb-1">البريد الإلكتروني</label>
                 <input
                   type="email"
                   required
@@ -965,7 +815,7 @@ export default function App() {
               </div>
 
               <div>
-                <label className="text-[10px] text-neutral-400 uppercase block mb-1">PASSWORD</label>
+                <label className="text-[10px] text-neutral-400 uppercase block mb-1">كلمة المرور</label>
                 <input
                   type="password"
                   required
@@ -975,50 +825,18 @@ export default function App() {
                 />
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-2.5 bg-neutral-900 border border-neutral-600 text-white font-mono text-xs tracking-[0.2em] uppercase font-bold hover:bg-neutral-800 cursor-pointer"
-              >
-                VERIFY CREDENTIALS
+              <button type="submit" className="w-full py-2.5 bg-neutral-900 border border-neutral-600 text-white font-mono text-xs tracking-[0.2em] uppercase font-bold hover:bg-neutral-800 cursor-pointer">
+                تأكيد البيانات والدخول
               </button>
             </form>
-
-            {/* Switch to Hierarchical Staff Profiles */}
-            <div className="space-y-2">
-              <span className="text-[10px] text-neutral-500 uppercase tracking-widest block">
-                OR SWITCH TO TEAM ROLE:
-              </span>
-              <div className="space-y-1.5">
-                {staff
-                  .filter((s) => !s.isOwner)
-                  .map((mem) => (
-                    <button
-                      key={mem.id}
-                      onClick={() => switchAccount(mem)}
-                      className="w-full p-2 bg-black border border-neutral-800 hover:border-neutral-500 text-left flex items-center justify-between text-xs transition cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2">
-                        <img src={mem.avatar} alt={mem.name} className="w-5 h-5 rounded-full object-cover" />
-                        <div>
-                          <div className="text-white font-bold">{mem.name}</div>
-                          <div className="text-[9px] text-neutral-400">{mem.roleTitle}</div>
-                        </div>
-                      </div>
-                      <span className="text-[9px] text-neutral-500 uppercase">{mem.rank}</span>
-                    </button>
-                  ))}
-              </div>
-            </div>
           </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* 1. STOREFRONT VIEW (ZARA HAUTE-COUTURE LOOKBOOK) */}
-      {/* ========================================================================= */}
+      {/* 1. واجهة المتجر التحريرية (STOREFRONT LOOKBOOK) */}
       {view === 'store' && (
         <main className="flex-1 w-full">
-          {/* RUNWAY CAMPAIGN HERO */}
+          {/* الغلاف السينمائي الكبير (Hero Banner) */}
           <section className="relative w-full h-[82vh] min-h-[580px] bg-neutral-950 overflow-hidden border-b border-neutral-800/80">
             <img
               src={themeConfig.heroBgImage}
@@ -1027,7 +845,6 @@ export default function App() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent"></div>
 
-            {/* Floating Typography */}
             <div className="absolute inset-x-0 bottom-0 max-w-[1720px] mx-auto px-6 sm:px-12 pb-14 flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="max-w-2xl text-white">
                 <span className="font-mono text-[10px] tracking-[0.35em] text-neutral-400 uppercase block mb-3">
@@ -1061,26 +878,26 @@ export default function App() {
             </div>
           </section>
 
-          {/* MANIFESTO BANNER */}
+          {/* البانر التعريفي */}
           <section className="border-b border-neutral-800/60 py-16 px-6 sm:px-12 text-center">
             <div className="max-w-3xl mx-auto space-y-4">
               <span className="text-[9px] font-mono tracking-[0.4em] opacity-60 uppercase block">
                 ATELIER MANIFESTO
               </span>
               <p className="font-serif text-xl sm:text-2xl font-light italic leading-relaxed">
-                "Pure density. Architectural proportions. Designed in Cairo to transcend transient streetwear trends."
+                "كثافة خالصة وخامات ميلتون معمارية مصممة في القاهرة لتتجاوز تقلبات الموضة السريعة."
               </p>
               <div className="pt-2 flex flex-wrap items-center justify-center gap-6 text-[10px] font-mono tracking-[0.2em] opacity-80 uppercase">
                 <span>100% COMBED HEAVYWEIGHT COTTON</span>
-                <span>â€¢</span>
+                <span>•</span>
                 <span>ZERO SHRINKAGE</span>
-                <span>â€¢</span>
+                <span>•</span>
                 <span>DOORSTEP TRY-ON WITH COURIER</span>
               </div>
             </div>
           </section>
 
-          {/* LOOKBOOK PRODUCTS GRID */}
+          {/* شبكة الكتالوج التحريرية */}
           <section id="lookbook-grid" className="max-w-[1720px] mx-auto px-6 sm:px-10 py-16">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-8 border-b border-neutral-800/80 gap-4 mb-12">
               <div className="font-mono text-[11px] tracking-[0.25em] opacity-70 uppercase">
@@ -1203,14 +1020,14 @@ export default function App() {
             </div>
           </section>
 
-          {/* LOCAL EGYPTIAN TRUST PILLARS */}
+          {/* مميزات الشحن والمعاينة الثلاثية */}
           <section className={`border-t ${themeStyles.border} py-14 px-6 sm:px-12 bg-black/20`}>
             <div className="max-w-[1720px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 font-mono text-xs tracking-wider">
               <div className={`border ${themeStyles.border} p-6 space-y-2`}>
                 <span className="text-[10px] block uppercase tracking-[0.25em] opacity-60">01 / INSPECTION</span>
                 <h4 className="font-serif text-base uppercase">DOORSTEP TRY-ON</h4>
                 <p className="text-[11px] font-sans opacity-80">
-                  Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆÙ‚ÙŠØ§Ø³ Ø§Ù„Ù‚Ø·Ø¹Ø© Ù…Ø¹ Ù…Ù†Ø¯ÙˆØ¨ Ø§Ù„Ø´Ø­Ù† Ù‚Ø¨Ù„ Ø¯ÙØ¹ Ø£ÙŠ Ù…Ø¨Ù„Øº Ù„Ù„ØªØ£ÙƒØ¯ Ù…Ù† Ø§Ù„Ù…Ù‚Ø§Ø³ ÙˆØ¬ÙˆØ¯Ø© Ø§Ù„Ù…ÙŠÙ„ØªÙˆÙ† 460GSM.
+                  معاينة وقياس القطعة مع مندوب الشحن قبل دفع أي مبلغ للتأكد من المقاس وجودة الميلتون 460GSM.
                 </p>
               </div>
 
@@ -1218,7 +1035,7 @@ export default function App() {
                 <span className="text-[10px] block uppercase tracking-[0.25em] opacity-60">02 / DISPATCH PARTNER</span>
                 <h4 className="font-serif text-base uppercase">{activeCourier.name}</h4>
                 <p className="text-[11px] font-sans opacity-80">
-                  Ø´Ø­Ù† Ù…Ø¤Ù…Ù† Ù„Ø¬Ù…ÙŠØ¹ Ø§Ù„Ù…Ø­Ø§ÙØ¸Ø§Øª Ø®Ù„Ø§Ù„ 24 Ù„Ù€ 48 Ø³Ø§Ø¹Ø© Ù…Ø¹ Ù…ÙŠØ²Ø© ØªØªØ¨Ø¹ Ø§Ù„Ø´Ø­Ù†Ø© Ø§Ù„Ù…Ø¨Ø§Ø´Ø±.
+                  شحن مؤمن لجميع المحافظات خلال 24 لـ 48 ساعة مع ميزة تتبع الشحنة المباشر.
                 </p>
               </div>
 
@@ -1226,13 +1043,13 @@ export default function App() {
                 <span className="text-[10px] block uppercase tracking-[0.25em] opacity-60">03 / EXCHANGES</span>
                 <h4 className="font-serif text-base uppercase">14-DAY REPLACEMENT</h4>
                 <p className="text-[11px] font-sans opacity-80">
-                  Ø¥Ù…ÙƒØ§Ù†ÙŠØ© Ø§Ø³ØªØ¨Ø¯Ø§Ù„ Ø§Ù„Ù…Ù‚Ø§Ø³ Ø¯ÙˆÙ† Ø£ÙŠ ØªØ¹Ù‚ÙŠØ¯ Ø¹Ø¨Ø± Ù…Ù†Ø¯ÙˆØ¨ Ø§Ù„Ø§Ø³ØªØ¨Ø¯Ø§Ù„ Ø§Ù„Ø³Ø±ÙŠØ¹.
+                  إمكانية استبدال المقاس دون أي تعقيد عبر مندوب الاستبدال السريع.
                 </p>
               </div>
             </div>
           </section>
 
-          {/* VISITOR FLOATING CHAT BUTTON */}
+          {/* ودجت المحادثة الحية المباشرة */}
           <div className="fixed bottom-6 left-6 z-40">
             <button
               onClick={() => setIsVisitorChatOpen(!isVisitorChatOpen)}
@@ -1243,7 +1060,6 @@ export default function App() {
             </button>
           </div>
 
-          {/* VISITOR CHAT POPUP WIDGET */}
           {isVisitorChatOpen && (
             <div className="fixed bottom-20 left-6 z-40 w-80 sm:w-96 border border-neutral-800 bg-[#0a0a0a] shadow-2xl font-mono text-xs flex flex-col h-96 text-white">
               <div className="p-3.5 border-b border-neutral-800 bg-black flex items-center justify-between">
@@ -1275,15 +1091,12 @@ export default function App() {
               <form onSubmit={handleVisitorChatSend} className="p-3 border-t border-neutral-800 flex gap-2 bg-black">
                 <input
                   type="text"
-                  placeholder="Ø§ÙƒØªØ¨ Ø§Ø³ØªÙØ³Ø§Ø±Ùƒ Ù‡Ù†Ø§..."
+                  placeholder="اكتب استفسارك هنا..."
                   value={visitorChatText}
                   onChange={(e) => setVisitorChatText(e.target.value)}
                   className="flex-1 bg-neutral-950 border border-neutral-800 px-3 py-2 text-xs text-white outline-none focus:border-white font-sans"
                 />
-                <button
-                  type="submit"
-                  className="px-3 bg-white text-black font-bold uppercase hover:bg-neutral-200 text-[10px]"
-                >
+                <button type="submit" className="px-3 bg-white text-black font-bold uppercase hover:bg-neutral-200 text-[10px]">
                   <Send className="w-3.5 h-3.5" />
                 </button>
               </form>
@@ -1292,31 +1105,20 @@ export default function App() {
         </main>
       )}
 
-      {/* ========================================================================= */}
-      {/* 2. ADMIN ENTERPRISE SUITE */}
-      {/* ========================================================================= */}
+      {/* 2. لوحة تحكم الإدارة الكاملة (ENTERPRISE CMS CONSOLE) */}
       {view === 'admin' && (
         <div className="flex-1 max-w-[1720px] mx-auto px-6 sm:px-10 py-8 w-full flex flex-col md:flex-row gap-8 font-mono">
-          {/* Admin Sidebar Navigation */}
           <aside className={`w-full md:w-80 border ${themeStyles.border} ${themeStyles.card} p-5 shrink-0 h-fit space-y-6`}>
             <div className={`border-b ${themeStyles.border} pb-4`}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[9px] tracking-[0.3em] opacity-60 uppercase">
-                  ENTERPRISE CONSOLE
-                </span>
+                <span className="text-[9px] tracking-[0.3em] opacity-60 uppercase">ENTERPRISE CONSOLE</span>
                 {currentUser.isOwner ? (
-                  <span className="text-[9px] bg-amber-400/20 text-amber-300 border border-amber-400/40 px-1.5 py-0.5 font-bold">
-                    MASTER OWNER
-                  </span>
+                  <span className="text-[9px] bg-amber-400/20 text-amber-300 border border-amber-400/40 px-1.5 py-0.5 font-bold">MASTER OWNER</span>
                 ) : (
-                  <span className="text-[9px] bg-neutral-800 text-neutral-300 px-1.5 py-0.5">
-                    {currentUser.roleTitle.split('/')[0]}
-                  </span>
+                  <span className="text-[9px] bg-neutral-800 text-neutral-300 px-1.5 py-0.5">{currentUser.roleTitle.split('/')[0]}</span>
                 )}
               </div>
-              <h2 className="text-sm font-bold tracking-[0.2em] uppercase">
-                LOOM OPERATIONS
-              </h2>
+              <h2 className="text-sm font-bold tracking-[0.2em] uppercase">LOOM OPERATIONS</h2>
               <div className="text-[10px] opacity-70 truncate mt-1 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span>{currentUser.email}</span>
@@ -1324,162 +1126,58 @@ export default function App() {
             </div>
 
             <nav className="space-y-1 text-xs tracking-[0.2em] uppercase">
-              {/* Waybill & Label Studio (Requested) */}
-              {(currentUser.isOwner || currentUser.permissions.waybills) && (
-                <button
-                  onClick={() => setAdminTab('waybills')}
-                  className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${
-                    adminTab === 'waybills' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Printer className="w-3.5 h-3.5" />
-                    <span>WAYBILL STUDIO (4Ã—6)</span>
-                  </div>
-                  <span className="text-[9px] bg-emerald-950 text-emerald-300 px-1 py-0.5 font-bold">THERMAL</span>
-                </button>
-              )}
+              <button onClick={() => setAdminTab('waybills')} className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${adminTab === 'waybills' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'}`}>
+                <div className="flex items-center gap-2.5"><Printer className="w-3.5 h-3.5" /><span>WAYBILL STUDIO (4×6)</span></div>
+                <span className="text-[9px] bg-emerald-950 text-emerald-300 px-1 py-0.5 font-bold">THERMAL</span>
+              </button>
 
-              {/* Staff Performance Matrix */}
-              <button
-                onClick={() => setAdminTab('performance')}
-                className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${
-                  adminTab === 'performance' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Activity className="w-3.5 h-3.5" />
-                  <span>STAFF PERFORMANCE</span>
-                </div>
+              <button onClick={() => setAdminTab('performance')} className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${adminTab === 'performance' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'}`}>
+                <div className="flex items-center gap-2.5"><Activity className="w-3.5 h-3.5" /><span>STAFF PERFORMANCE</span></div>
                 <span className="text-[10px]">[{staff.length}]</span>
               </button>
 
-              {/* Exclusive Financial Intelligence (Owner Only) */}
               {currentUser.isOwner && (
-                <button
-                  onClick={() => setAdminTab('revenue')}
-                  className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${
-                    adminTab === 'revenue' ? 'bg-amber-400 text-black font-bold' : 'text-amber-300 hover:bg-amber-950/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <DollarSign className="w-3.5 h-3.5" />
-                    <span>NET REVENUE & COGS</span>
-                  </div>
+                <button onClick={() => setAdminTab('revenue')} className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${adminTab === 'revenue' ? 'bg-amber-400 text-black font-bold' : 'text-amber-300 hover:bg-amber-950/40'}`}>
+                  <div className="flex items-center gap-2.5"><DollarSign className="w-3.5 h-3.5" /><span>NET REVENUE & COGS</span></div>
                   <span className="text-[9px] bg-black/40 text-amber-300 px-1 py-0.5">OWNER</span>
                 </button>
               )}
 
-              {/* Orders Pipeline */}
-              {(currentUser.isOwner || currentUser.permissions.orders) && (
-                <button
-                  onClick={() => setAdminTab('orders')}
-                  className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${
-                    adminTab === 'orders' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <ShoppingBag className="w-3.5 h-3.5" />
-                    <span>ORDERS & DISPATCH</span>
-                  </div>
-                  <span className="text-[10px]">[{orders.length}]</span>
-                </button>
-              )}
+              <button onClick={() => setAdminTab('orders')} className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${adminTab === 'orders' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'}`}>
+                <div className="flex items-center gap-2.5"><ShoppingBag className="w-3.5 h-3.5" /><span>ORDERS & DISPATCH</span></div>
+                <span className="text-[10px]">[{orders.length}]</span>
+              </button>
 
-              {/* Courier Partners Hub */}
-              {(currentUser.isOwner || currentUser.permissions.logistics) && (
-                <button
-                  onClick={() => setAdminTab('couriers')}
-                  className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${
-                    adminTab === 'couriers' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Truck className="w-3.5 h-3.5" />
-                    <span>COURIER PARTNERS</span>
-                  </div>
-                  <span className="text-[10px]">[{couriers.length}]</span>
-                </button>
-              )}
+              <button onClick={() => setAdminTab('couriers')} className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${adminTab === 'couriers' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'}`}>
+                <div className="flex items-center gap-2.5"><Truck className="w-3.5 h-3.5" /><span>COURIER PARTNERS</span></div>
+                <span className="text-[10px]">[{couriers.length}]</span>
+              </button>
 
-              {/* Payment Gateways (Owner Only) */}
               {currentUser.isOwner && (
-                <button
-                  onClick={() => setAdminTab('gateways')}
-                  className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${
-                    adminTab === 'gateways' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <CreditCard className="w-3.5 h-3.5" />
-                    <span>PAYMENT GATEWAYS</span>
-                  </div>
+                <button onClick={() => setAdminTab('gateways')} className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${adminTab === 'gateways' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'}`}>
+                  <div className="flex items-center gap-2.5"><CreditCard className="w-3.5 h-3.5" /><span>PAYMENT GATEWAYS</span></div>
                   <span className="text-[10px]">[{gateways.length}]</span>
                 </button>
               )}
 
-              {/* Catalog & Drops */}
-              {(currentUser.isOwner || currentUser.permissions.products) && (
-                <button
-                  onClick={() => setAdminTab('products')}
-                  className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${
-                    adminTab === 'products' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Package className="w-3.5 h-3.5" />
-                    <span>CATALOG & DROPS</span>
-                  </div>
-                  <span className="text-[10px]">[{products.length}]</span>
-                </button>
-              )}
+              <button onClick={() => setAdminTab('products')} className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${adminTab === 'products' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'}`}>
+                <div className="flex items-center gap-2.5"><Package className="w-3.5 h-3.5" /><span>CATALOG & DROPS</span></div>
+                <span className="text-[10px]">[{products.length}]</span>
+              </button>
 
-              {/* Lookbook Design */}
-              {(currentUser.isOwner || currentUser.permissions.design) && (
-                <button
-                  onClick={() => setAdminTab('design')}
-                  className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${
-                    adminTab === 'design' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Palette className="w-3.5 h-3.5" />
-                    <span>THEME & CONTENT</span>
-                  </div>
-                </button>
-              )}
+              <button onClick={() => setAdminTab('design')} className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${adminTab === 'design' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'}`}>
+                <div className="flex items-center gap-2.5"><Palette className="w-3.5 h-3.5" /><span>THEME & CONTENT</span></div>
+              </button>
 
-              {/* Staff Roles Control */}
-              {(currentUser.isOwner || currentUser.permissions.staff) && (
-                <button
-                  onClick={() => setAdminTab('staff')}
-                  className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${
-                    adminTab === 'staff' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Users className="w-3.5 h-3.5" />
-                    <span>HIERARCHY & ROLES</span>
-                  </div>
-                </button>
-              )}
+              <button onClick={() => setAdminTab('staff')} className={`w-full flex items-center justify-between px-3 py-3 transition text-left cursor-pointer ${adminTab === 'staff' ? themeStyles.highlight : 'opacity-70 hover:opacity-100 hover:bg-neutral-800/40'}`}>
+                <div className="flex items-center gap-2.5"><Users className="w-3.5 h-3.5" /><span>HIERARCHY & ROLES</span></div>
+              </button>
             </nav>
-
-            <div className={`pt-4 border-t ${themeStyles.border} space-y-2 text-[10px] opacity-60`}>
-              <div className="flex justify-between">
-                <span>ACTIVE COURIER:</span>
-                <span className="font-bold">{activeCourier.name.split(' ')[0]}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>WAYBILL PRINTER:</span>
-                <span className="text-emerald-400 font-bold">READY (4Ã—6")</span>
-              </div>
-            </div>
           </aside>
 
-          {/* Admin Workspace Content */}
+          {/* محتوى لوحة التحكم */}
           <div className={`flex-1 border ${themeStyles.border} ${themeStyles.card} p-6 sm:p-8 min-h-[680px]`}>
-            {/* 1. WAYBILL & SHIPPING LABEL STUDIO (REQUESTED SPECIFICATION) */}
+            {/* استوديو بوالص الشحن الحرارية */}
             {adminTab === 'waybills' && (
               <div className="space-y-8">
                 <div className={`border-b ${themeStyles.border} pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
@@ -1488,21 +1186,18 @@ export default function App() {
                       WAYBILL & SHIPPING LABEL ENGINE (PRINT STUDIO)
                     </h3>
                     <p className="text-xs opacity-70 font-sans tracking-normal mt-0.5">
-                      Multi-format thermal label & docket printer supporting 4Ã—6 inch Zebra/Xprinter, A4 dockets, and A6 stickers.
+                      طباعة بوالص الشحن الحرارية بمقاس 4×6 لطابعات الباركود (Zebra/Xprinter) وكذلك A4 و A6.
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => window.print()}
-                      className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg"
-                    >
-                      <Printer className="w-4 h-4" />
-                      <span>PRINT WAYBILL NOW</span>
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => window.print()}
+                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg"
+                  >
+                    <Printer className="w-4 h-4" />
+                    <span>طباعة البوليصة الحرارية الآن</span>
+                  </button>
                 </div>
 
-                {/* Configuration Controls Bar */}
                 <div className={`border ${themeStyles.border} p-4 bg-black/30 flex flex-wrap items-center justify-between gap-4 text-xs`}>
                   <div className="flex items-center gap-3">
                     <span className="opacity-70 uppercase tracking-widest text-[10px]">SELECT ORDER:</span>
@@ -1516,73 +1211,49 @@ export default function App() {
                     >
                       {orders.map((o) => (
                         <option key={o.id} value={o.id}>
-                          #{o.id} â€” {o.customerName} ({o.totalAmount} EGP)
+                          #{o.id} — {o.customerName} ({o.totalAmount} ج.م)
                         </option>
                       ))}
                     </select>
                   </div>
 
-                  {/* Format Selector: 4x6 vs A4 vs A6 */}
                   <div className="flex items-center gap-2">
-                    <span className="opacity-70 uppercase tracking-widest text-[10px]">LABEL SIZE:</span>
+                    <span className="opacity-70 uppercase tracking-widest text-[10px]">مقاس الورق:</span>
                     <div className="flex border border-neutral-700">
-                      <button
-                        onClick={() => setWaybillFormat('4x6')}
-                        className={`px-3 py-1 text-[10px] uppercase font-bold transition ${
-                          waybillFormat === '4x6' ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
-                        }`}
-                      >
-                        4Ã—6" THERMAL (100Ã—150MM)
+                      <button onClick={() => setWaybillFormat('4x6')} className={`px-3 py-1 text-[10px] uppercase font-bold transition ${waybillFormat === '4x6' ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'}`}>
+                        4×6" حراري (Zebra)
                       </button>
-                      <button
-                        onClick={() => setWaybillFormat('a4')}
-                        className={`px-3 py-1 text-[10px] uppercase font-bold transition ${
-                          waybillFormat === 'a4' ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
-                        }`}
-                      >
-                        A4 DOCKET (DESKTOP)
+                      <button onClick={() => setWaybillFormat('a4')} className={`px-3 py-1 text-[10px] uppercase font-bold transition ${waybillFormat === 'a4' ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'}`}>
+                        A4 ورقة كاملة
                       </button>
-                      <button
-                        onClick={() => setWaybillFormat('a6')}
-                        className={`px-3 py-1 text-[10px] uppercase font-bold transition ${
-                          waybillFormat === 'a6' ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'
-                        }`}
-                      >
-                        A6 COMPACT
+                      <button onClick={() => setWaybillFormat('a6')} className={`px-3 py-1 text-[10px] uppercase font-bold transition ${waybillFormat === 'a6' ? 'bg-white text-black' : 'text-neutral-400 hover:text-white'}`}>
+                        A6 ملصق مدمج
                       </button>
                     </div>
                   </div>
 
-                  {/* Barcode Format */}
                   <div className="flex items-center gap-2">
-                    <span className="opacity-70 uppercase tracking-widest text-[10px]">BARCODE:</span>
+                    <span className="opacity-70 uppercase tracking-widest text-[10px]">الباركود:</span>
                     <div className="flex border border-neutral-700">
-                      <button
-                        onClick={() => setBarcodeType('code128')}
-                        className={`px-2.5 py-1 text-[10px] uppercase ${barcodeType === 'code128' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}
-                      >
+                      <button onClick={() => setBarcodeType('code128')} className={`px-2.5 py-1 text-[10px] uppercase ${barcodeType === 'code128' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}>
                         CODE 128
                       </button>
-                      <button
-                        onClick={() => setBarcodeType('qr')}
-                        className={`px-2.5 py-1 text-[10px] uppercase ${barcodeType === 'qr' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}
-                      >
+                      <button onClick={() => setBarcodeType('qr')} className={`px-2.5 py-1 text-[10px] uppercase ${barcodeType === 'qr' ? 'bg-white text-black font-bold' : 'text-neutral-400'}`}>
                         QR CODE
                       </button>
                     </div>
                   </div>
                 </div>
 
-                {/* VISUAL WAYBILL CANVAS CONTAINER */}
                 <div className="flex justify-center p-6 bg-neutral-950/70 border border-neutral-800 overflow-x-auto">
-                  {/* OPTION 1: 4Ã—6 INCH STANDARD THERMAL LABEL (100 x 150 mm) */}
                   {waybillFormat === '4x6' && (
                     <div className="w-[380px] bg-white text-black border-2 border-black p-5 shadow-2xl font-mono flex flex-col justify-between space-y-4">
-                      {/* Top Header */}
                       <div className="border-b-2 border-black pb-3 flex items-start justify-between">
                         <div>
-                          <div className="text-2xl font-serif font-black tracking-widest uppercase">
-                            LOOM âˆž
+                          <div className="text-2xl font-serif font-black tracking-widest uppercase flex items-center">
+                            <span>L</span>
+                            <InfinityLogo className="w-6 h-4 mx-0.5" />
+                            <span>M</span>
                           </div>
                           <span className="text-[9px] uppercase tracking-wider block font-bold">
                             HEAVYWEIGHT ATELIER CAIRO
@@ -1596,11 +1267,9 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Barcode & Tracking Number */}
                       <div className="text-center py-2 border-b-2 border-black space-y-1">
                         {barcodeType === 'code128' ? (
                           <div className="h-12 flex items-center justify-center space-x-1 overflow-hidden px-4">
-                            {/* Simulated High-Res Code 128 Vector Stripes */}
                             {[2,4,1,3,2,5,1,2,4,2,3,1,4,2,1,5,3,2,4,1,2,3,4,1,3,2,5,1,4,2,3,1].map((w, idx) => (
                               <div key={idx} className="bg-black h-full" style={{ width: `${w * 2}px` }}></div>
                             ))}
@@ -1613,257 +1282,66 @@ export default function App() {
                         <span className="text-xs font-black tracking-[0.25em]">{activeWaybillOrder.waybillNumber}</span>
                       </div>
 
-                      {/* Inspection & Try-On Guarantee Stamp */}
                       <div className="border-2 border-black bg-neutral-100 p-2 text-center">
                         <span className="text-xs font-black block font-sans">
-                          â˜… Ù…Ø³Ù…ÙˆØ­ Ø¨Ø§Ù„Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆØ§Ù„Ù‚ÙŠØ§Ø³ Ù…Ø¹ Ø§Ù„Ù…Ù†Ø¯ÙˆØ¨ Ù‚Ø¨Ù„ Ø§Ù„Ø¯ÙØ¹ â˜…
+                          ★ مسموح بالمعاينة والقياس مع المندوب قبل الدفع ★
                         </span>
                         <span className="text-[9px] font-mono uppercase tracking-wider block text-neutral-700">
                           DOORSTEP INSPECTION & FITTING AUTHORIZED
                         </span>
                       </div>
 
-                      {/* Customer & Destination Information */}
                       <div className="space-y-2 border-b-2 border-black pb-3 text-xs">
                         <div className="flex justify-between">
-                          <span className="font-bold text-neutral-600">RECIPIENT:</span>
+                          <span className="font-bold text-neutral-600">العميل:</span>
                           <span className="font-black font-sans uppercase">{activeWaybillOrder.customerName}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="font-bold text-neutral-600">PHONE:</span>
+                          <span className="font-bold text-neutral-600">الهاتف:</span>
                           <span className="font-black font-mono">{activeWaybillOrder.phone}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="font-bold text-neutral-600">GOVERNORATE:</span>
+                          <span className="font-bold text-neutral-600">المحافظة:</span>
                           <span className="font-black uppercase">{activeWaybillOrder.governorate.toUpperCase()}</span>
                         </div>
                         <div>
-                          <span className="font-bold text-neutral-600 block">DELIVERY ADDRESS:</span>
+                          <span className="font-bold text-neutral-600 block">العنوان التفصيلي:</span>
                           <span className="font-sans font-bold block text-sm leading-snug mt-0.5">
-                            {activeWaybillOrder.address} â€” {activeWaybillOrder.city}
+                            {activeWaybillOrder.address} — {activeWaybillOrder.city}
                           </span>
                         </div>
                       </div>
 
-                      {/* Items & Manifest */}
                       <div className="border-b-2 border-black pb-3 text-[10px] space-y-1">
-                        <span className="font-bold text-neutral-600 block uppercase">ORDER CONTENT:</span>
+                        <span className="font-bold text-neutral-600 block uppercase">محتويات الطرد:</span>
                         {activeWaybillOrder.items.map((it, idx) => (
                           <div key={idx} className="flex justify-between font-sans font-medium">
-                            <span>â€¢ {it.name}</span>
+                            <span>• {it.name}</span>
                             <span className="font-bold font-mono">x{it.qty}</span>
                           </div>
                         ))}
                       </div>
 
-                      {/* Big Cash on Delivery Amount */}
                       <div className="bg-black text-white p-3 flex items-center justify-between">
                         <div>
                           <span className="text-[9px] font-bold tracking-widest block uppercase text-neutral-300">
                             CASH TO COLLECT (COD)
                           </span>
                           <span className="text-[11px] font-sans font-bold text-neutral-200">
-                            Ø§Ù„Ù…Ø·Ù„ÙˆØ¨ ØªØ­ØµÙŠÙ„Ù‡ Ù†Ù‚Ø¯ÙŠØ§Ù‹
+                            المطلوب تحصيله نقدياً
                           </span>
                         </div>
                         <div className="text-2xl font-black font-mono">
                           {activeWaybillOrder.totalAmount} EGP
                         </div>
                       </div>
-
-                      <div className="text-[8px] text-neutral-500 text-center tracking-wider uppercase pt-1">
-                        LOOM STUDIOS ATELIER â€¢ DISPATCH HUB CAIRO â€¢ RETURN IF UNDELIVERED IN 5 DAYS
-                      </div>
-                    </div>
-                  )}
-
-                  {/* OPTION 2: A4 DOCKET (DESKTOP DUAL PACKING SLIP & INVOICE) */}
-                  {waybillFormat === 'a4' && (
-                    <div className="w-[620px] bg-white text-black border border-neutral-300 p-8 shadow-2xl font-mono text-xs space-y-6">
-                      <div className="border-b pb-4 flex justify-between items-start">
-                        <div>
-                          <div className="text-3xl font-serif font-black uppercase">LOOM STUDIOS</div>
-                          <p className="text-[10px] text-neutral-600">OFFICIAL PACKING MANIFEST & TAX DOCKET</p>
-                        </div>
-                        <div className="text-right">
-                          <span className="font-bold text-sm block">ORDER REF: #{activeWaybillOrder.id}</span>
-                          <span className="text-[10px] text-neutral-500">DATE: {activeWaybillOrder.date}</span>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 border p-4 bg-neutral-50">
-                        <div>
-                          <span className="text-[10px] font-bold text-neutral-500 uppercase block">SHIP TO:</span>
-                          <div className="font-bold font-sans text-sm">{activeWaybillOrder.customerName}</div>
-                          <div className="font-sans text-xs">{activeWaybillOrder.phone}</div>
-                          <div className="font-sans text-xs mt-1">{activeWaybillOrder.address}</div>
-                          <div className="font-bold uppercase text-xs mt-1">{activeWaybillOrder.city}</div>
-                        </div>
-                        <div>
-                          <span className="text-[10px] font-bold text-neutral-500 uppercase block">DISPATCH ROUTE:</span>
-                          <div className="font-bold text-xs">CARRIER: {activeCourier.name}</div>
-                          <div className="font-bold text-xs">TRACKING #: {activeWaybillOrder.waybillNumber}</div>
-                          <div className="font-sans font-bold text-emerald-800 text-xs mt-1">
-                            âœ“ ÙŠØ³Ù…Ø­ Ø¨ÙØªØ­ Ø§Ù„Ø´Ø­Ù†Ø© ÙˆÙ‚ÙŠØ§Ø³Ù‡Ø§ Ù‚Ø¨Ù„ Ø§Ù„Ø³Ø¯Ø§Ø¯
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Line Items Table */}
-                      <table className="w-full text-left text-xs border">
-                        <thead className="bg-neutral-100 border-b">
-                          <tr>
-                            <th className="p-2">Description</th>
-                            <th className="p-2 text-center">Qty</th>
-                            <th className="p-2 text-right">Price</th>
-                            <th className="p-2 text-right">Total</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                          {activeWaybillOrder.items.map((it, idx) => (
-                            <tr key={idx}>
-                              <td className="p-2 font-sans font-medium">{it.name}</td>
-                              <td className="p-2 text-center">{it.qty}</td>
-                              <td className="p-2 text-right font-mono">{it.price} EGP</td>
-                              <td className="p-2 text-right font-mono">{it.price * it.qty} EGP</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                        <tfoot className="border-t font-bold">
-                          <tr>
-                            <td colSpan={3} className="p-2 text-right">SHIPPING SUBSIDY ({activeCourier.name.split(' ')[0]}):</td>
-                            <td className="p-2 text-right font-mono">{activeWaybillOrder.shippingCost} EGP</td>
-                          </tr>
-                          <tr className="text-sm bg-neutral-100">
-                            <td colSpan={3} className="p-2 text-right">FINAL COD DUE AMOUNT:</td>
-                            <td className="p-2 text-right font-mono font-black">{activeWaybillOrder.totalAmount} EGP</td>
-                          </tr>
-                        </tfoot>
-                      </table>
-
-                      <div className="border-t pt-4 text-[10px] text-neutral-500 flex justify-between">
-                        <span>PRINTED FROM ATELIER MASTER CONSOLE</span>
-                        <span>CUSTOMER SIGNATURE: _______________________</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* OPTION 3: A6 COMPACT STICKER */}
-                  {waybillFormat === 'a6' && (
-                    <div className="w-[300px] bg-white text-black border-2 border-black p-4 shadow-xl font-mono text-xs space-y-3">
-                      <div className="flex justify-between items-center border-b border-black pb-2">
-                        <span className="font-serif font-black text-xl">LOOM âˆž</span>
-                        <span className="bg-black text-white text-[9px] px-2 py-0.5 font-bold uppercase">
-                          {activeCourier.name.split(' ')[0]}
-                        </span>
-                      </div>
-                      <div className="text-center">
-                        <span className="font-black text-sm block">#{activeWaybillOrder.id}</span>
-                        <span className="text-[10px] text-neutral-600 block">{activeWaybillOrder.waybillNumber}</span>
-                      </div>
-                      <div className="border border-black p-2 bg-neutral-100 text-[10px] font-sans font-bold text-center">
-                        Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆÙ‚ÙŠØ§Ø³ Ù‚Ø¨Ù„ Ø§Ù„Ø³Ø¯Ø§Ø¯
-                      </div>
-                      <div className="text-[11px] font-sans space-y-0.5">
-                        <div className="font-bold">{activeWaybillOrder.customerName}</div>
-                        <div>{activeWaybillOrder.phone}</div>
-                        <div className="text-[10px] leading-tight text-neutral-800">{activeWaybillOrder.address}</div>
-                      </div>
-                      <div className="bg-black text-white p-2 flex justify-between items-center">
-                        <span className="text-[9px] uppercase font-bold">COLLECT:</span>
-                        <span className="text-lg font-black font-mono">{activeWaybillOrder.totalAmount} EGP</span>
-                      </div>
                     </div>
                   )}
                 </div>
               </div>
             )}
 
-            {/* 2. STAFF PERFORMANCE & AGENT PRODUCTIVITY MONITOR */}
-            {adminTab === 'performance' && (
-              <div className="space-y-8">
-                <div className={`border-b ${themeStyles.border} pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
-                  <div>
-                    <h3 className="text-base font-bold tracking-[0.2em] uppercase">
-                      EMPLOYEE PERFORMANCE & AGENT PRODUCTIVITY MATRIX
-                    </h3>
-                    <p className="text-xs opacity-70 font-sans tracking-normal mt-0.5">
-                      Real-time accountability matrix: tracking WhatsApp order confirmations, customer chat handling, and SLA scores.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="opacity-70">TEAM STATUS:</span>
-                    <span className="text-emerald-400 font-bold">4 AGENTS ACTIVE</span>
-                  </div>
-                </div>
-
-                {/* Performance Cards Matrix */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {staff.map((member) => (
-                    <div
-                      key={member.id}
-                      className={`border ${themeStyles.border} bg-black/40 p-4 space-y-4 hover:border-neutral-500 transition`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={member.avatar}
-                          alt={member.name}
-                          className="w-10 h-10 rounded-full object-cover border border-neutral-700"
-                        />
-                        <div className="overflow-hidden">
-                          <h4 className="text-xs font-bold uppercase truncate">{member.name}</h4>
-                          <span className="text-[10px] opacity-70 block truncate">{member.roleTitle}</span>
-                        </div>
-                      </div>
-
-                      {/* KPI Progress Bar */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[10px]">
-                          <span className="opacity-60 uppercase">PRODUCTIVITY KPI</span>
-                          <span className="font-bold">{member.kpiScore}%</span>
-                        </div>
-                        <div className="w-full bg-neutral-900 h-1.5 overflow-hidden">
-                          <div
-                            className={`h-full ${member.kpiScore >= 95 ? 'bg-emerald-400' : 'bg-white'}`}
-                            style={{ width: `${member.kpiScore}%` }}
-                          ></div>
-                        </div>
-                      </div>
-
-                      {/* Key Productivity Metrics */}
-                      <div className={`grid grid-cols-2 gap-2 text-[10px] border-t border-b ${themeStyles.border} py-2.5`}>
-                        <div>
-                          <span className="opacity-60 block">ORDERS CONFIRMED</span>
-                          <span className="font-bold text-xs">{member.ordersConfirmedToday} Ø§Ù„ÙŠÙˆÙ…</span>
-                        </div>
-                        <div>
-                          <span className="opacity-60 block">CHATS RESOLVED</span>
-                          <span className="font-bold text-xs">{member.chatsHandled} Ù…Ø­Ø§Ø¯Ø«Ø©</span>
-                        </div>
-                        <div>
-                          <span className="opacity-60 block">AVG SPEED</span>
-                          <span className="font-bold text-xs">{member.avgResponseMinutes} min</span>
-                        </div>
-                        <div>
-                          <span className="opacity-60 block">SATISFACTION</span>
-                          <span className="text-amber-300 font-bold text-xs">â˜… {member.csat}</span>
-                        </div>
-                      </div>
-
-                      {/* Recent Activity Log */}
-                      <div>
-                        <span className="text-[9px] opacity-60 uppercase block mb-1">LATEST ACTION:</span>
-                        <p className="text-[10px] opacity-90 font-sans leading-tight">
-                          {member.recentAction}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* 3. ADVANCED REVENUE & NET PROFIT INTELLIGENCE (EXCLUSIVE TO OWNER) */}
+            {/* تقارير الأرباح والمصروفات الخاصة بالمالك فقط */}
             {adminTab === 'revenue' && currentUser.isOwner && (
               <div className="space-y-8">
                 <div className={`border-b ${themeStyles.border} pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
@@ -1879,7 +1357,7 @@ export default function App() {
                     </h3>
                   </div>
                   <button
-                    onClick={() => showToast('FINANCIAL SETTLEMENT STATEMENT DOWNLOADED')}
+                    onClick={() => showToast('تم تصدير كشف الحساب المالي')}
                     className="px-4 py-2 bg-amber-400 text-black font-bold text-xs uppercase hover:bg-amber-300 flex items-center gap-2"
                   >
                     <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -1887,416 +1365,73 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Primary Financial Pillars */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className={`border ${themeStyles.border} p-5 bg-black/40 space-y-1`}>
-                    <span className="text-[10px] opacity-60 tracking-[0.2em] uppercase block">GROSS SALES</span>
+                    <span className="text-[10px] opacity-60 tracking-[0.2em] uppercase block">إجمالي المبيعات (GROSS)</span>
                     <div className="text-2xl font-serif">{financialMetrics.grossSales.toLocaleString()} EGP</div>
-                    <span className="text-[10px] opacity-70">{financialMetrics.ordersCount} Total Verified Orders</span>
+                    <span className="text-[10px] opacity-70">{financialMetrics.ordersCount} طلبات مؤكدة</span>
                   </div>
 
                   <div className={`border ${themeStyles.border} p-5 bg-black/40 space-y-1`}>
-                    <span className="text-[10px] opacity-60 tracking-[0.2em] uppercase block">TOTAL COGS (FABRICS & SEWING)</span>
+                    <span className="text-[10px] opacity-60 tracking-[0.2em] uppercase block">تكلفة الخامات والتصنيع (COGS)</span>
                     <div className="text-2xl font-serif text-rose-300">-{financialMetrics.totalCogs.toLocaleString()} EGP</div>
-                    <span className="text-[10px] opacity-70">Direct Cost of Terry/Fleece</span>
+                    <span className="text-[10px] opacity-70">ميلتون 460 جرام وقص وتطريز</span>
                   </div>
 
                   <div className={`border ${themeStyles.border} p-5 bg-black/40 space-y-1`}>
-                    <span className="text-[10px] opacity-60 tracking-[0.2em] uppercase block">COURIER DISPATCH FEES</span>
+                    <span className="text-[10px] opacity-60 tracking-[0.2em] uppercase block">رسوم الشحن والتوصيل</span>
                     <div className="text-2xl font-serif text-amber-200">-{financialMetrics.totalShippingCost.toLocaleString()} EGP</div>
-                    <span className="text-[10px] opacity-70">Paid to Bosta / Couriers</span>
+                    <span className="text-[10px] opacity-70">تسديدات بوسطة / مايلرز</span>
                   </div>
 
                   <div className="border border-amber-500/50 p-5 bg-amber-950/20 space-y-1">
-                    <span className="text-[10px] text-amber-300 tracking-[0.2em] uppercase block font-bold">NET TAKE-HOME PROFIT</span>
+                    <span className="text-[10px] text-amber-300 tracking-[0.2em] uppercase block font-bold">صافي أرباح المالك (NET PROFIT)</span>
                     <div className="text-3xl font-serif text-amber-400 font-bold">{financialMetrics.netProfit.toLocaleString()} EGP</div>
-                    <span className="text-[10px] text-emerald-400 font-bold">Net Margin: {financialMetrics.netMarginPercent}%</span>
-                  </div>
-                </div>
-
-                {/* COD Cash Reconciliation Status */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className={`border ${themeStyles.border} p-5 bg-black/40 space-y-4`}>
-                    <div className={`flex items-center justify-between border-b ${themeStyles.border} pb-2`}>
-                      <span className="text-xs font-bold uppercase tracking-wider">CASH ON DELIVERY STATUS (COD)</span>
-                      <Wallet className="w-4 h-4 text-emerald-400" />
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs opacity-70">Collected Cash in Courier Safe:</span>
-                        <span className="font-bold">{financialMetrics.collectedCash.toLocaleString()} EGP</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs opacity-70">In-Transit Uncollected Parcels:</span>
-                        <span className="text-amber-300 font-bold">{financialMetrics.inTransitCash.toLocaleString()} EGP</span>
-                      </div>
-                      <div className={`flex justify-between items-center pt-2 border-t ${themeStyles.border} text-xs`}>
-                        <span className="opacity-60">Settlement Target Bank:</span>
-                        <span>CIB Egypt / InstaPay Business</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className={`border ${themeStyles.border} p-5 bg-black/40 space-y-4`}>
-                    <div className={`flex items-center justify-between border-b ${themeStyles.border} pb-2`}>
-                      <span className="text-xs font-bold uppercase tracking-wider">UNIT ECONOMICS (TRACKSUIT)</span>
-                      <Percent className="w-4 h-4 opacity-70" />
-                    </div>
-                    <div className="space-y-2 text-xs">
-                      <div className="flex justify-between">
-                        <span className="opacity-70">Retail Sale Price:</span>
-                        <span className="font-bold">899 EGP</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="opacity-70">Fabric & Trim Cost (460GSM):</span>
-                        <span>-420 EGP</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="opacity-70">Shipping Subsidy (Bosta):</span>
-                        <span>-55 EGP</span>
-                      </div>
-                      <div className={`flex justify-between pt-2 border-t ${themeStyles.border} text-emerald-400 font-bold`}>
-                        <span>Net Profit Per Suit Sold:</span>
-                        <span>+424 EGP (47.1% Net)</span>
-                      </div>
-                    </div>
+                    <span className="text-[10px] text-emerald-400 font-bold">هامش الربح الصافي: {financialMetrics.netMarginPercent}%</span>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* 4. ORDERS & DISPATCH PIPELINE */}
-            {adminTab === 'orders' && (
-              <div className="space-y-8">
-                <div className={`border-b ${themeStyles.border} pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
-                  <div>
-                    <h3 className="text-base font-bold tracking-[0.2em] uppercase">
-                      EGYPTIAN COD DISPATCH PIPELINE
-                    </h3>
-                    <p className="text-xs opacity-70 font-sans tracking-normal mt-0.5">
-                      Verify orders, trigger Arabic WhatsApp confirmations, print waybills, and export manifests.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const csvContent =
-                        'data:text/csv;charset=utf-8,' +
-                        'ID,Customer,Phone,City,Address,Total,Waybill\n' +
-                        orders
-                          .map((o) => `"${o.id}","${o.customerName}","${o.phone}","${o.city}","${o.address}","${o.totalAmount}","${o.waybillNumber}"`)
-                          .join('\n');
-                      const link = document.createElement('a');
-                      link.setAttribute('href', encodeURI(csvContent));
-                      link.setAttribute('download', `loom_dispatch_${Date.now()}.csv`);
-                      document.body.appendChild(link);
-                      link.click();
-                      showToast('COURIER CSV MANIFEST DOWNLOADED');
-                    }}
-                    className="px-5 py-2.5 bg-neutral-900 border border-neutral-700 text-white text-xs tracking-[0.2em] uppercase font-bold hover:bg-neutral-800 flex items-center gap-2 cursor-pointer"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>EXPORT COURIER SHEET</span>
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  {orders.map((order) => {
-                    const waText = encodeURIComponent(
-                      `Ø£Ù‡Ù„Ø§Ù‹ Ø¨Ø­Ø¶Ø±ØªÙƒ ÙŠØ§ Ø£Ø³ØªØ§Ø° ${order.customerName} ÙÙŠ LOOM STUDIOS! ðŸ–¤\nÙ†ÙˆØ¯ ØªØ£ÙƒÙŠØ¯ Ø·Ù„Ø¨Ùƒ Ø±Ù‚Ù…: #${order.id}\nØ§Ù„Ù‚Ø·Ø¹ Ø§Ù„Ù…Ø·Ù„ÙˆØ¨Ø©: ${order.items
-                        .map((i) => `${i.name} (x${i.qty})`)
-                        .join(' + ')}\nØ§Ù„Ù…Ø¨Ù„Øº Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø´Ø§Ù…Ù„ Ø§Ù„Ø´Ø­Ù†: ${order.totalAmount} Ø¬.Ù… (Ø§Ù„Ø¯ÙØ¹ Ø¹Ù†Ø¯ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù… Ù…Ø¹ Ø§Ù„Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆØ§Ù„Ù‚ÙŠØ§Ø³ Ù…Ø¬Ø§Ù†Ø§Ù‹).\nØ§Ù„Ø¹Ù†ÙˆØ§Ù† Ø§Ù„Ù…Ø³Ø¬Ù„: ${order.address} - ${order.city}.\nØ¨Ø±Ø¬Ø§Ø¡ Ø§Ù„Ø±Ø¯ Ø¨ÙƒÙ„Ù…Ø© (ØªØ£ÙƒÙŠØ¯) Ù„Ø´Ø­Ù† Ø·Ù„Ø¨Ùƒ ÙÙˆØ±Ø§Ù‹!`
-                    );
-                    const waHref = `https://wa.me/2${order.phone.replace(/^0/, '')}?text=${waText}`;
-
-                    return (
-                      <div
-                        key={order.id}
-                        className={`border ${themeStyles.border} p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 bg-black/40`}
-                      >
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-2 text-xs">
-                            <span className="font-bold uppercase tracking-wider">#{order.id}</span>
-                            <span className="opacity-40">|</span>
-                            <span className="font-sans font-bold">{order.customerName}</span>
-                            <span className="opacity-60">({order.phone})</span>
-                            <span className="text-[10px] bg-neutral-800 text-neutral-300 px-1.5 py-0.5">
-                              {order.waybillNumber}
-                            </span>
-                          </div>
-                          <div className="opacity-80 font-sans text-xs flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 opacity-60" />
-                            <span>{order.city} â€” {order.address}</span>
-                          </div>
-                          <div className="opacity-60 text-[11px]">
-                            {order.items.map((i) => `${i.name} [x${i.qty}]`).join(' â€¢ ')}
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-3">
-                          <div className="text-right">
-                            <div className="font-bold text-sm">{order.totalAmount} EGP</div>
-                            <div className="text-[10px] opacity-70 font-sans">{order.paymentMethod}</div>
-                          </div>
-
-                          {/* Print Waybill Shortcut */}
-                          <button
-                            onClick={() => {
-                              setActiveWaybillOrder(order);
-                              setAdminTab('waybills');
-                              showToast(`WAYBILL LOADED FOR ORDER #${order.id}`);
-                            }}
-                            className="px-3 py-1.5 bg-neutral-800 text-white hover:bg-neutral-700 text-xs flex items-center gap-1.5 font-mono cursor-pointer"
-                            title="Generate 4x6 Waybill"
-                          >
-                            <Printer className="w-3.5 h-3.5" />
-                            <span>WAYBILL</span>
-                          </button>
-
-                          <select
-                            value={order.status}
-                            onChange={(e) => {
-                              const updated = orders.map((o) =>
-                                o.id === order.id ? { ...o, status: e.target.value } : o
-                              );
-                              setOrders(updated);
-                              showToast(`STATUS: ${e.target.value}`);
-                            }}
-                            className="bg-black border border-neutral-700 px-3 py-1.5 text-xs text-white uppercase focus:border-white outline-none"
-                          >
-                            <option value="Pending Confirmation">Pending Confirmation</option>
-                            <option value="WhatsApp Verified">WhatsApp Verified</option>
-                            <option value="Dispatched with Courier">Dispatched</option>
-                            <option value="Delivered & Collected">Delivered & Collected</option>
-                            <option value="Returned">Returned</option>
-                          </select>
-
-                          <a
-                            href={waHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 font-sans"
-                          >
-                            <MessageCircle className="w-3.5 h-3.5" />
-                            <span>ØªØ£ÙƒÙŠØ¯ ÙˆØ§ØªØ³Ø§Ø¨</span>
-                          </a>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* 5. MULTI-COURIER & SHIPPING LOGISTICS HUB */}
-            {adminTab === 'couriers' && (
-              <div className="space-y-8">
-                <div className={`border-b ${themeStyles.border} pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
-                  <div>
-                    <h3 className="text-base font-bold tracking-[0.2em] uppercase">
-                      SHIPPING PARTNERS & MULTI-COURIER MANAGEMENT
-                    </h3>
-                    <p className="text-xs opacity-70 font-sans tracking-normal mt-0.5">
-                      Enable or disable shipping companies, adjust regional rates per governorate, and toggle default couriers.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const name = prompt('ENTER NEW SHIPPING COMPANY NAME (e.g. J&T Express):');
-                      if (name) {
-                        const newCourier = {
-                          id: `courier-${Date.now()}`,
-                          name,
-                          active: true,
-                          isDefault: false,
-                          sla: '48 Hours',
-                          coverage: 'Nationwide',
-                          rates: { cairo: 65, giza: 65, alex: 80, delta: 85, canal: 90, upper: 110 },
-                          collectedCodPending: 0,
-                          settlementCycle: 'Weekly Automated Transfer',
-                          phone: '01000000000'
-                        };
-                        setCouriers([...couriers, newCourier]);
-                        showToast(`NEW COURIER PARTNER ADDED: ${name}`);
-                      }
-                    }}
-                    className={`px-4 py-2.5 ${themeStyles.highlight} text-xs font-bold uppercase flex items-center gap-2`}
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>ADD SHIPPING COMPANY</span>
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  {couriers.map((c) => (
-                    <div
-                      key={c.id}
-                      className={`border p-5 space-y-4 ${
-                        c.isDefault ? 'border-emerald-500/50 bg-emerald-950/10' : `${themeStyles.border} bg-black/40`
-                      }`}
-                    >
-                      <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b ${themeStyles.border} pb-3`}>
-                        <div>
-                          <div className="flex items-center gap-3">
-                            <h4 className="text-sm font-bold uppercase">{c.name}</h4>
-                            {c.isDefault && (
-                              <span className="text-[9px] bg-emerald-400 text-black px-2 py-0.5 font-bold uppercase">
-                                DEFAULT STOREFRONT COURIER
-                              </span>
-                            )}
-                            <span className={`text-[10px] px-2 py-0.5 uppercase ${c.active ? 'text-emerald-400 border border-emerald-800' : 'opacity-60 border border-neutral-700'}`}>
-                              {c.active ? 'ACTIVE' : 'DISABLED'}
-                            </span>
-                          </div>
-                          <span className="text-xs opacity-70 font-sans mt-0.5 block">
-                            SLA: {c.sla} â€¢ Coverage: {c.coverage} â€¢ Settlement: {c.settlementCycle}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => {
-                              setCouriers(
-                                couriers.map((item) => ({
-                                  ...item,
-                                  isDefault: item.id === c.id
-                                }))
-                              );
-                              showToast(`DEFAULT COURIER SET TO: ${c.name}`);
-                            }}
-                            className="px-3 py-1.5 border border-neutral-700 text-xs hover:border-white uppercase"
-                          >
-                            SET AS DEFAULT
-                          </button>
-                          <button
-                            onClick={() => {
-                              setCouriers(
-                                couriers.map((item) =>
-                                  item.id === c.id ? { ...item, active: !item.active } : item
-                                )
-                              );
-                              showToast(`COURIER STATUS TOGGLED`);
-                            }}
-                            className={`px-3 py-1.5 text-xs font-bold uppercase ${c.active ? 'bg-rose-950 text-rose-300 border border-rose-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}`}
-                          >
-                            {c.active ? 'DEACTIVATE' : 'ACTIVATE'}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Regional Rates */}
-                      <div>
-                        <span className="text-[10px] opacity-60 uppercase tracking-widest block mb-2">
-                          RATES PER GOVERNORATE (EGP):
-                        </span>
-                        <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
-                          {Object.entries(c.rates).map(([zone, cost]) => (
-                            <div key={zone} className="border border-neutral-800 bg-black/60 p-2 text-center">
-                              <span className="text-[9px] opacity-60 uppercase block">{zone}</span>
-                              <span className="font-bold text-xs">{cost} EGP</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* 6. PAYMENT GATEWAYS HUB */}
-            {adminTab === 'gateways' && currentUser.isOwner && (
-              <div className="space-y-8">
-                <div className={`border-b ${themeStyles.border} pb-4`}>
-                  <h3 className="text-base font-bold tracking-[0.2em] uppercase">
-                    PAYMENT GATEWAYS & SETTLEMENT PROVIDERS
-                  </h3>
-                  <p className="text-xs opacity-70 font-sans tracking-normal mt-0.5">
-                    Select which payment channels to activate for Egyptian and international customers.
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  {gateways.map((gw) => (
-                    <div
-                      key={gw.id}
-                      className={`border p-5 space-y-4 ${
-                        gw.active ? 'border-neutral-600 bg-black/40' : 'border-neutral-800 opacity-60'
-                      }`}
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div>
-                          <div className="flex items-center gap-3">
-                            <h4 className="text-sm font-bold uppercase">{gw.name}</h4>
-                            <span className="text-[9px] bg-neutral-800 text-neutral-300 px-2 py-0.5 uppercase tracking-wider">
-                              {gw.badge}
-                            </span>
-                          </div>
-                          <p className="text-xs opacity-70 font-sans mt-1">{gw.description}</p>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => {
-                              setGateways(
-                                gateways.map((g) => (g.id === gw.id ? { ...g, active: !g.active } : g))
-                              );
-                              showToast(`GATEWAY: ${gw.name} ${gw.active ? 'DISABLED' : 'ENABLED'}`);
-                            }}
-                            className={`px-4 py-2 text-xs font-bold uppercase transition ${
-                              gw.active
-                                ? 'bg-white text-black hover:bg-neutral-200'
-                                : 'bg-neutral-900 border border-neutral-700 text-neutral-400 hover:text-white'
-                            }`}
-                          >
-                            {gw.active ? 'ENABLED' : 'ACTIVATE'}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* 7. CATALOG CRUD */}
+            {/* شاشة إدارة المنتجات وإضافة قطع جديدة */}
             {adminTab === 'products' && (
               <div className="space-y-8">
                 <div className={`border-b ${themeStyles.border} pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
                   <div>
-                    <h3 className="text-base font-bold tracking-[0.2em] uppercase">
-                      CATALOG INVENTORY & DROPS
-                    </h3>
-                    <p className="text-xs opacity-70 font-sans tracking-normal mt-0.5">
-                      Adjust pricing, toggle runway drops, manage stock quantities and descriptions.
-                    </p>
+                    <h3 className="text-base font-bold tracking-[0.2em] uppercase">CATALOG INVENTORY & DROPS</h3>
+                    <p className="text-xs opacity-70 font-sans tracking-normal mt-0.5">التحكم في الأسعار، الخامات، والكميات المتوفرة بالمخزون.</p>
                   </div>
                   <button
                     onClick={() => {
-                      const newItem = {
-                        id: `loom-0${products.length + 1}`,
-                        ref: `REF. 0482/10${products.length + 1}`,
-                        title: 'ARCHIVAL MINERAL WASH OVERSIZED HOODIE',
-                        subtitle: 'VINTAGE MINERAL WASH SILHOUETTE',
-                        category: 'hoodies',
-                        gender: 'UNISEX',
-                        price: 780,
-                        salePrice: 680,
-                        cogs: 290,
-                        badge: 'NEW DROP',
-                        fabric: '480 GSM Mineral Terry',
-                        stock: 30,
-                        sizes: ['M/L', 'L/XL'],
-                        image: 'https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=1200&q=85',
-                        description: 'Generous boxy cut with industrial silver accents and double hood volume.',
-                        highlight: 'Ø¥ØµØ¯Ø§Ø± Ø®Ø±ÙŠÙÙŠ Ø¬Ø¯ÙŠØ¯'
-                      };
-                      setProducts([newItem, ...products]);
-                      showToast('NEW PIECE ADDED TO LOOKBOOK');
+                      const name = prompt('اسم القطعة الجديدة:');
+                      const price = prompt('سعر البيع (ج.م):');
+                      if (name && price) {
+                        const newItem = {
+                          id: `loom-0${products.length + 1}`,
+                          ref: `REF. 0482/10${products.length + 1}`,
+                          title: name.toUpperCase(),
+                          subtitle: 'NEW DROP ARCHIVE',
+                          category: 'hoodies',
+                          gender: 'UNISEX',
+                          price: Number(price),
+                          salePrice: Number(price) - 100,
+                          cogs: Number(price) * 0.4,
+                          badge: 'NEW DROP',
+                          fabric: '480 GSM Cotton',
+                          stock: 25,
+                          sizes: ['M/L', 'L/XL'],
+                          image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=85',
+                          description: 'ميلتون مصري فائق النعومة بوزن 480 جرام.',
+                          highlight: 'إصدار جديد'
+                        };
+                        setProducts([newItem, ...products]);
+                        showToast('تمت إضافة المنتج للكتالوج بنجاح');
+                      }
                     }}
                     className={`px-5 py-2.5 ${themeStyles.highlight} text-xs tracking-[0.2em] uppercase font-bold flex items-center gap-2 cursor-pointer`}
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>ADD LOOKBOOK DESIGN</span>
+                    <span>إضافة تصميم جديد للكتالوج</span>
                   </button>
                 </div>
 
@@ -2304,64 +1439,52 @@ export default function App() {
                   <table className="w-full text-left text-xs border border-neutral-800 divide-y divide-neutral-800">
                     <thead>
                       <tr className="bg-black/60 opacity-70 tracking-[0.2em] uppercase">
-                        <th className="py-3 px-3">Item / Reference</th>
-                        <th className="py-3 px-3">Fabric GSM</th>
-                        <th className="py-3 px-3">Cost (COGS)</th>
-                        <th className="py-3 px-3">Price</th>
-                        <th className="py-3 px-3">Sale</th>
-                        <th className="py-3 px-3">Inventory</th>
-                        <th className="py-3 px-3 text-center">Actions</th>
+                        <th className="py-3 px-3">المنتج والرمز</th>
+                        <th className="py-3 px-3">وزن الخامة</th>
+                        <th className="py-3 px-3">التكلفة (COGS)</th>
+                        <th className="py-3 px-3">السعر الأصلي</th>
+                        <th className="py-3 px-3">سعر البيع</th>
+                        <th className="py-3 px-3">المخزون</th>
+                        <th className="py-3 px-3 text-center">إجراءات</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-neutral-800">
                       {products.map((item) => (
                         <tr key={item.id} className="hover:bg-neutral-900/40">
                           <td className="py-3 px-3 flex items-center gap-3">
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              className="w-11 h-14 object-cover bg-neutral-900 filter grayscale-[20%]"
-                            />
+                            <img src={item.image} alt={item.title} className="w-11 h-14 object-cover bg-neutral-900 filter grayscale-[20%]" />
                             <div>
                               <div className="font-bold uppercase tracking-wider">{item.title}</div>
                               <div className="text-[10px] opacity-60">{item.ref}</div>
                             </div>
                           </td>
                           <td className="py-3 px-3 opacity-80">{item.fabric}</td>
-                          <td className="py-3 px-3 opacity-70 font-mono">{item.cogs || 200} EGP</td>
-                          <td className="py-3 px-3 opacity-50 line-through">{item.price} EGP</td>
-                          <td className="py-3 px-3 font-bold">{item.salePrice || item.price} EGP</td>
+                          <td className="py-3 px-3 opacity-70 font-mono">{item.cogs || 200} ج.م</td>
+                          <td className="py-3 px-3 opacity-50 line-through">{item.price} ج.م</td>
+                          <td className="py-3 px-3 font-bold">{item.salePrice || item.price} ج.م</td>
                           <td className="py-3 px-3">
-                            <span className="text-[10px] border border-neutral-700 px-2 py-0.5 uppercase">
-                              {item.stock} UNITS
-                            </span>
+                            <span className="text-[10px] border border-neutral-700 px-2 py-0.5 uppercase">{item.stock} قطعة</span>
                           </td>
                           <td className="py-3 px-3 text-center">
                             <div className="flex items-center justify-center gap-2">
                               <button
                                 onClick={() => {
-                                  const pr = prompt('ENTER NEW SALE PRICE (EGP):', item.salePrice || item.price);
+                                  const pr = prompt('أدخل سعر البيع الجديد (ج.م):', item.salePrice || item.price);
                                   if (pr) {
-                                    setProducts(
-                                      products.map((p) =>
-                                        p.id === item.id ? { ...p, salePrice: Number(pr) } : p
-                                      )
-                                    );
-                                    showToast('PRICE ADJUSTED');
+                                    setProducts(products.map((p) => p.id === item.id ? { ...p, salePrice: Number(pr) } : p));
+                                    showToast('تم تحديث السعر');
                                   }
                                 }}
                                 className="p-1.5 opacity-70 hover:opacity-100 cursor-pointer"
-                                title="Edit Price"
                               >
                                 <Edit className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => {
                                   setProducts(products.filter((p) => p.id !== item.id));
-                                  showToast('ITEM REMOVED FROM LOOKBOOK');
+                                  showToast('تم حذف المنتج');
                                 }}
                                 className="p-1.5 opacity-50 hover:text-rose-400 cursor-pointer"
-                                title="Delete Item"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -2374,378 +1497,70 @@ export default function App() {
                 </div>
               </div>
             )}
-
-            {/* 8. LOOKBOOK THEME & CONTENT */}
-            {adminTab === 'design' && (
-              <div className="space-y-8">
-                <div className={`border-b ${themeStyles.border} pb-4 flex items-center justify-between`}>
-                  <div>
-                    <h3 className="text-base font-bold tracking-[0.2em] uppercase">
-                      EDITORIAL LOOKBOOK CONTROLLER
-                    </h3>
-                    <p className="text-xs opacity-70 font-sans tracking-normal mt-0.5">
-                      Customize campaign runway imagery, headlines, and announcement bar.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => showToast('LOOKBOOK EDITORIAL COMMITTED')}
-                    className={`px-5 py-2.5 ${themeStyles.highlight} text-xs tracking-[0.2em] uppercase font-bold cursor-pointer`}
-                  >
-                    COMMIT
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className={`border ${themeStyles.border} p-5 space-y-4`}>
-                    <span className="text-[10px] tracking-[0.25em] opacity-70 block uppercase">
-                      TICKER BAR CONFIGURATION
-                    </span>
-                    <div>
-                      <label className="text-[10px] opacity-60 block mb-1">TICKER MANIFESTO TEXT</label>
-                      <input
-                        type="text"
-                        value={themeConfig.tickerText}
-                        onChange={(e) => setThemeConfig({ ...themeConfig, tickerText: e.target.value })}
-                        className="w-full bg-black/60 border border-neutral-700 px-3 py-2 text-xs text-white uppercase focus:border-white outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] opacity-60 block mb-1">LOCAL INSPECTION BADGE (ARABIC)</label>
-                      <input
-                        type="text"
-                        value={themeConfig.tickerArabicBadge}
-                        onChange={(e) => setThemeConfig({ ...themeConfig, tickerArabicBadge: e.target.value })}
-                        className="w-full bg-black/60 border border-neutral-700 px-3 py-2 text-xs text-white font-sans focus:border-white outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className={`border ${themeStyles.border} p-5 space-y-4`}>
-                    <span className="text-[10px] tracking-[0.25em] opacity-70 block uppercase">
-                      RUNWAY HERO MEDIA
-                    </span>
-                    <div>
-                      <label className="text-[10px] opacity-60 block mb-1">RUNWAY IMAGE URL</label>
-                      <input
-                        type="text"
-                        value={themeConfig.heroBgImage}
-                        onChange={(e) => setThemeConfig({ ...themeConfig, heroBgImage: e.target.value })}
-                        className="w-full bg-black/60 border border-neutral-700 px-3 py-2 text-xs text-white focus:border-white outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] opacity-60 block mb-1">HERO HEADLINE</label>
-                      <input
-                        type="text"
-                        value={themeConfig.heroHeading}
-                        onChange={(e) => setThemeConfig({ ...themeConfig, heroHeading: e.target.value })}
-                        className="w-full bg-black/60 border border-neutral-700 px-3 py-2 text-xs text-white uppercase focus:border-white outline-none font-serif"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 9. HIERARCHICAL STAFF & ROLES */}
-            {adminTab === 'staff' && (
-              <div className="space-y-8">
-                <div className={`border-b ${themeStyles.border} pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
-                  <div>
-                    <h3 className="text-base font-bold tracking-[0.2em] uppercase">
-                      ORGANIZATIONAL HIERARCHY & PERMISSIONS MATRIX
-                    </h3>
-                    <p className="text-xs opacity-70 font-sans tracking-normal mt-0.5">
-                      Assign custom roles across Executive, Management, and Operational levels.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const name = prompt('MEMBER FULL NAME:');
-                      const email = prompt('MEMBER GMAIL:');
-                      if (name && email) {
-                        setStaff([
-                          ...staff,
-                          {
-                            id: `staff-${Date.now()}`,
-                            name,
-                            email,
-                            roleTitle: 'Operations Associate',
-                            rank: 'Level 3: Operations',
-                            isOwner: false,
-                            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-                            status: 'online',
-                            kpiScore: 90,
-                            ordersConfirmedToday: 0,
-                            chatsHandled: 0,
-                            avgResponseMinutes: 3.0,
-                            csat: 5.0,
-                            recentAction: 'Account provisioned by Master Owner',
-                            permissions: { design: false, products: true, orders: true, analytics: false, marketing: false, staff: false, finance: false, logistics: false, waybills: true }
-                          }
-                        ]);
-                        showToast(`INVITATION ASSIGNED TO: ${email}`);
-                      }
-                    }}
-                    className={`px-5 py-2.5 ${themeStyles.highlight} text-xs tracking-[0.2em] uppercase font-bold flex items-center gap-2 cursor-pointer`}
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>INVITE COLLABORATOR</span>
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  {staff.map((member) => (
-                    <div
-                      key={member.id}
-                      className={`border p-5 space-y-4 ${
-                        member.isOwner
-                          ? 'border-amber-500/50 bg-amber-950/10'
-                          : `${themeStyles.border} bg-black/40`
-                      }`}
-                    >
-                      <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b ${themeStyles.border} pb-3`}>
-                        <div className="flex items-center gap-3">
-                          <img src={member.avatar} alt={member.name} className="w-8 h-8 rounded-full object-cover" />
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm uppercase">{member.name}</span>
-                              <span className={`text-[10px] px-2 py-0.5 uppercase ${
-                                member.isOwner
-                                  ? 'bg-amber-400 text-black font-bold'
-                                  : 'border border-neutral-700 opacity-70'
-                              }`}>
-                                {member.roleTitle}
-                              </span>
-                            </div>
-                            <span className="text-xs opacity-60">{member.email} â€¢ {member.rank}</span>
-                          </div>
-                        </div>
-                        <span className="text-[10px] text-emerald-400 uppercase tracking-widest">â— {member.status.toUpperCase()}</span>
-                      </div>
-
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        {[
-                          { key: 'waybills', label: 'WAYBILL PRINTING' },
-                          { key: 'orders', label: 'COURIER DISPATCH' },
-                          { key: 'products', label: 'CATALOG & PRICING' },
-                          { key: 'logistics', label: 'COURIER PARTNERS' },
-                          { key: 'finance', label: 'FINANCE & COGS' },
-                          { key: 'gateways', label: 'PAYMENT GATEWAYS' },
-                          { key: 'design', label: 'LOOKBOOK DESIGN' },
-                          { key: 'staff', label: 'STAFF CONTROL' }
-                        ].map((perm) => (
-                          <label
-                            key={perm.key}
-                            className={`flex items-center gap-2 bg-black border p-2 text-[10px] cursor-pointer ${
-                              member.permissions[perm.key]
-                                ? 'border-neutral-500 text-white'
-                                : 'border-neutral-900 opacity-50'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              disabled={member.isOwner}
-                              checked={member.permissions[perm.key] || false}
-                              onChange={(e) => {
-                                const updated = staff.map((s) => {
-                                  if (s.id === member.id) {
-                                    return {
-                                      ...s,
-                                      permissions: { ...s.permissions, [perm.key]: e.target.checked }
-                                    };
-                                  }
-                                  return s;
-                                });
-                                setStaff(updated);
-                                showToast('PERMISSIONS SYNCHRONIZED');
-                              }}
-                              className="accent-white"
-                            />
-                            <span>{perm.label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* 3. SIZE & FIT ADVISOR MODAL */}
-      {/* ========================================================================= */}
+      {/* حاسبة المقاسات التفاعلية المتقدمة */}
       {showSizeAdvisor && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-6 text-white">
           <div className="border border-neutral-800 bg-[#0a0a0a] max-w-lg w-full p-8 relative font-mono">
-            <button
-              onClick={() => setShowSizeAdvisor(false)}
-              className="absolute top-6 right-6 text-neutral-400 hover:text-white cursor-pointer"
-            >
+            <button onClick={() => setShowSizeAdvisor(false)} className="absolute top-6 right-6 text-neutral-400 hover:text-white cursor-pointer">
               <X className="w-5 h-5" />
             </button>
 
-            <span className="text-[10px] tracking-[0.3em] text-neutral-500 uppercase block mb-1">
-              ATELIER MEASUREMENTS
-            </span>
-            <h3 className="font-serif text-2xl font-light tracking-[0.15em] text-white uppercase mb-6">
-              SIZE & SILHOUETTE CALCULATOR
-            </h3>
+            <span className="text-[10px] tracking-[0.3em] text-neutral-500 uppercase block mb-1">ATELIER MEASUREMENTS</span>
+            <h3 className="font-serif text-2xl font-light tracking-[0.15em] text-white uppercase mb-6">SIZE & SILHOUETTE CALCULATOR</h3>
 
             <div className="space-y-6 mb-8 border border-neutral-900 p-6 bg-black">
               <div>
                 <div className="flex justify-between text-xs mb-2 text-neutral-300">
-                  <span>BODY WEIGHT:</span>
+                  <span>الوزن (BODY WEIGHT):</span>
                   <span className="text-white font-bold">{calcWeight} KG</span>
                 </div>
-                <input
-                  type="range"
-                  min="50"
-                  max="120"
-                  value={calcWeight}
-                  onChange={(e) => setCalcWeight(Number(e.target.value))}
-                  className="w-full accent-white"
-                />
+                <input type="range" min="50" max="120" value={calcWeight} onChange={(e) => setCalcWeight(Number(e.target.value))} className="w-full accent-white" />
               </div>
 
               <div>
                 <div className="flex justify-between text-xs mb-2 text-neutral-300">
-                  <span>HEIGHT:</span>
+                  <span>الطول (HEIGHT):</span>
                   <span className="text-white font-bold">{calcHeight} CM</span>
                 </div>
-                <input
-                  type="range"
-                  min="155"
-                  max="205"
-                  value={calcHeight}
-                  onChange={(e) => setCalcHeight(Number(e.target.value))}
-                  className="w-full accent-white"
-                />
+                <input type="range" min="155" max="205" value={calcHeight} onChange={(e) => setCalcHeight(Number(e.target.value))} className="w-full accent-white" />
               </div>
             </div>
 
             <div className="border border-neutral-700 p-6 space-y-2 mb-6">
-              <span className="text-[10px] tracking-[0.25em] text-neutral-400 uppercase block">
-                RECOMMENDED SILHOUETTE
-              </span>
+              <span className="text-[10px] tracking-[0.25em] text-neutral-400 uppercase block">المقاس الموصى به لإطلالة أوفرسايز مميزة</span>
               <div className="text-2xl font-serif text-white">{recommendedSize.size}</div>
               <p className="text-xs text-neutral-400 font-sans tracking-wide">{recommendedSize.fit}</p>
             </div>
 
             <div className="text-neutral-400 font-sans text-xs flex items-center gap-2 border-t border-neutral-900 pt-4">
               <ShieldCheck className="w-4 h-4 text-white shrink-0" />
-              <span>Ù…ØªØ§Ø­ Ù‚ÙŠØ§Ø³ Ø§Ù„Ù‚Ø·Ø¹Ø© ÙˆØªØ¬Ø±Ø¨ØªÙ‡Ø§ Ù…Ø¹ Ø§Ù„Ù…Ù†Ø¯ÙˆØ¨ Ù‚Ø¨Ù„ Ø¯ÙØ¹ Ø£ÙŠ Ø¬Ù†ÙŠÙ‡.</span>
+              <span>متاح قياس القطعة وتجربتها مع المندوب قبل دفع أي جنيه.</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* 4. PRODUCT DETAIL MODAL */}
-      {/* ========================================================================= */}
-      {activeModalProduct && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-6 text-white">
-          <div className="border border-neutral-800 bg-[#0a0a0a] max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-10 relative font-mono">
-            <button
-              onClick={() => setActiveModalProduct(null)}
-              className="absolute top-6 right-6 text-neutral-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="aspect-[3/4] bg-neutral-950 overflow-hidden">
-                <img
-                  src={activeModalProduct.image}
-                  alt={activeModalProduct.title}
-                  className="w-full h-full object-cover filter grayscale-[15%]"
-                />
-              </div>
-
-              <div className="flex flex-col justify-between space-y-6">
-                <div>
-                  <div className="text-[10px] tracking-[0.25em] text-neutral-500 uppercase mb-2">
-                    {activeModalProduct.ref} â€¢ {activeModalProduct.fabric}
-                  </div>
-                  <h3 className="font-serif text-2xl font-light tracking-[0.15em] text-white uppercase mb-2">
-                    {activeModalProduct.title}
-                  </h3>
-                  <p className="text-xs text-neutral-400 font-sans leading-relaxed mb-6">
-                    {activeModalProduct.description}
-                  </p>
-
-                  <div className="flex items-baseline gap-3 mb-8">
-                    <span className="text-2xl font-serif text-white">
-                      {activeModalProduct.salePrice || activeModalProduct.price} EGP
-                    </span>
-                    {activeModalProduct.salePrice && (
-                      <span className="text-sm text-neutral-500 line-through">
-                        {activeModalProduct.price} EGP
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-3">
-                    <span className="text-[10px] tracking-[0.2em] text-neutral-400 uppercase block">
-                      CHOOSE SIZE:
-                    </span>
-                    <div className="flex gap-3">
-                      {activeModalProduct.sizes.map((sz) => (
-                        <button
-                          key={sz}
-                          onClick={() => {
-                            addToCart(activeModalProduct, sz);
-                            setActiveModalProduct(null);
-                            setIsCartOpen(true);
-                          }}
-                          className="flex-1 py-3 border border-neutral-700 hover:border-white text-xs tracking-[0.2em] uppercase text-white font-bold transition cursor-pointer"
-                        >
-                          {sz}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t border-neutral-900 font-sans text-xs text-neutral-400">
-                  ðŸ›¡ï¸ Ø´Ø­Ù† Ù…Ø¤Ù…Ù† Ø¹Ø¨Ø± <strong>{activeCourier.name}</strong> Ù…Ø¹ Ø§Ù„Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆØ§Ù„Ù‚ÙŠØ§Ø³ Ø§Ù„Ù…Ø¬Ø§Ù†ÙŠ Ù‚Ø¨Ù„ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù….
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* 5. SLIDE-OUT SHOPPING BAG & EXPRESS EGYPT COD DRAWER */}
-      {/* ========================================================================= */}
+      {/* سلة الشراء وإتمام الطلب (COD) */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden bg-black/80 backdrop-blur-sm flex justify-end text-white">
           <div className="w-full max-w-md bg-[#0a0a0a] h-full border-l border-neutral-800 flex flex-col justify-between font-mono">
-            {/* Header */}
             <div className="p-6 border-b border-neutral-900 flex items-center justify-between text-xs tracking-[0.25em] uppercase">
-              <span className="text-white font-bold">SHOPPING BAG [{cart.reduce((s, i) => s + i.quantity, 0)}]</span>
-              <button
-                onClick={() => setIsCartOpen(false)}
-                className="text-neutral-400 hover:text-white cursor-pointer"
-              >
+              <span className="text-white font-bold">حقيبة التسوق [{cart.reduce((s, i) => s + i.quantity, 0)}]</span>
+              <button onClick={() => setIsCartOpen(false)} className="text-neutral-400 hover:text-white cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {cart.length === 0 ? (
                 <div className="py-20 text-center text-neutral-600 space-y-3">
-                  <div className="text-xs uppercase tracking-[0.2em]">YOUR BAG IS EMPTY</div>
-                  <button
-                    onClick={() => setIsCartOpen(false)}
-                    className="px-6 py-2.5 border border-neutral-700 text-neutral-300 text-[10px] tracking-[0.2em] uppercase hover:border-white cursor-pointer"
-                  >
-                    RETURN TO LOOKBOOK
+                  <div className="text-xs uppercase tracking-[0.2em]">الحقيبة فارغة حالياً</div>
+                  <button onClick={() => setIsCartOpen(false)} className="px-6 py-2.5 border border-neutral-700 text-neutral-300 text-[10px] tracking-[0.2em] uppercase hover:border-white cursor-pointer">
+                    العودة للكتالوج
                   </button>
                 </div>
               ) : (
@@ -2753,38 +1568,30 @@ export default function App() {
                   <div className="space-y-4">
                     {cart.map((item) => (
                       <div key={item.key} className="flex gap-4 border-b border-neutral-900 pb-4">
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          className="w-14 h-18 object-cover bg-neutral-950 filter grayscale-[15%]"
-                        />
+                        <img src={item.image} alt={item.title} className="w-14 h-18 object-cover bg-neutral-950 filter grayscale-[15%]" />
                         <div className="flex-1 space-y-1">
                           <h4 className="text-xs font-bold text-white uppercase tracking-wider">{item.title}</h4>
-                          <div className="text-[10px] text-neutral-500">SIZE: {item.size} â€¢ QTY: {item.quantity}</div>
-                          <div className="text-xs text-white">{item.price} EGP</div>
+                          <div className="text-[10px] text-neutral-500">مقاس: {item.size} • عدد: {item.quantity}</div>
+                          <div className="text-xs text-white">{item.price} ج.م</div>
                         </div>
-                        <button
-                          onClick={() => removeFromCart(item.key)}
-                          className="text-neutral-500 hover:text-white cursor-pointer"
-                        >
+                        <button onClick={() => removeFromCart(item.key)} className="text-neutral-500 hover:text-white cursor-pointer">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     ))}
                   </div>
 
-                  {/* Express Cash On Delivery Order Form */}
                   <form onSubmit={handlePlaceOrder} className="pt-4 border-t border-neutral-900 space-y-4 font-sans">
                     <div className="flex items-center justify-between font-mono text-xs tracking-wider">
-                      <span className="text-white uppercase font-bold">CHECKOUT & DISPATCH</span>
-                      <span className="text-[11px] text-neutral-400">Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆÙ‚ÙŠØ§Ø³ Ù…Ù†Ø²Ù„ÙŠ</span>
+                      <span className="text-white uppercase font-bold">بيانات التوصيل والشحن</span>
+                      <span className="text-[11px] text-neutral-400">معاينة وقياس منزلي</span>
                     </div>
 
                     <div>
                       <input
                         type="text"
                         required
-                        placeholder="Ø§Ù„Ø§Ø³Ù… Ø«Ù„Ø§Ø«ÙŠ (Full Name)"
+                        placeholder="الاسم ثلاثي (Full Name)"
                         value={checkoutData.name}
                         onChange={(e) => setCheckoutData({ ...checkoutData, name: e.target.value })}
                         className="w-full bg-black border border-neutral-800 p-3 text-xs text-white focus:border-white outline-none"
@@ -2795,7 +1602,7 @@ export default function App() {
                       <input
                         type="tel"
                         required
-                        placeholder="Ø±Ù‚Ù… Ø§Ù„Ù‡Ø§ØªÙ (WhatsApp Mobile)"
+                        placeholder="رقم الهاتف (WhatsApp Mobile)"
                         value={checkoutData.phone}
                         onChange={(e) => setCheckoutData({ ...checkoutData, phone: e.target.value })}
                         className="w-full bg-black border border-neutral-800 p-3 text-xs text-white focus:border-white outline-none font-mono"
@@ -2805,16 +1612,14 @@ export default function App() {
                     <div className="grid grid-cols-2 gap-2">
                       <select
                         value={checkoutData.governorate}
-                        onChange={(e) =>
-                          setCheckoutData({ ...checkoutData, governorate: e.target.value })
-                        }
+                        onChange={(e) => setCheckoutData({ ...checkoutData, governorate: e.target.value })}
                         className="bg-black border border-neutral-800 p-3 text-xs text-white"
                       >
                         {EGYPT_GOVERNORATES.map((g) => {
                           const cost = activeCourier.rates[g.id] || g.defaultCost;
                           return (
                             <option key={g.id} value={g.id}>
-                              {g.name} (+{cost}Ø¬)
+                              {g.name} (+{cost}ج)
                             </option>
                           );
                         })}
@@ -2822,11 +1627,9 @@ export default function App() {
                       <input
                         type="text"
                         required
-                        placeholder="Ø§Ù„Ù…Ù†Ø·Ù‚Ø© Ø£Ùˆ Ø§Ù„Ø­ÙŠ"
+                        placeholder="المنطقة أو الحي"
                         value={checkoutData.cityArea}
-                        onChange={(e) =>
-                          setCheckoutData({ ...checkoutData, cityArea: e.target.value })
-                        }
+                        onChange={(e) => setCheckoutData({ ...checkoutData, cityArea: e.target.value })}
                         className="w-full bg-black border border-neutral-800 p-3 text-xs text-white focus:border-white outline-none"
                       />
                     </div>
@@ -2835,61 +1638,24 @@ export default function App() {
                       <input
                         type="text"
                         required
-                        placeholder="Ø§Ù„Ø¹Ù†ÙˆØ§Ù† Ø§Ù„ØªÙØµÙŠÙ„ÙŠ (Ø§Ù„Ø´Ø§Ø±Ø¹ ÙˆØ±Ù‚Ù… Ø§Ù„Ø¹Ù…Ø§Ø±Ø©)"
+                        placeholder="العنوان التفصيلي (الشارع ورقم العمارة)"
                         value={checkoutData.address}
-                        onChange={(e) =>
-                          setCheckoutData({ ...checkoutData, address: e.target.value })
-                        }
+                        onChange={(e) => setCheckoutData({ ...checkoutData, address: e.target.value })}
                         className="w-full bg-black border border-neutral-800 p-3 text-xs text-white focus:border-white outline-none"
                       />
                     </div>
 
-                    {/* Payment Gateway Selector */}
-                    <div>
-                      <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block mb-2">
-                        CHOOSE PAYMENT METHOD:
-                      </span>
-                      <div className="space-y-1.5 font-mono text-xs">
-                        {gateways
-                          .filter((g) => g.active)
-                          .map((gw) => (
-                            <label
-                              key={gw.id}
-                              className={`flex items-center justify-between p-2.5 border cursor-pointer ${
-                                checkoutData.paymentGateway === gw.id
-                                  ? 'border-white bg-neutral-900 text-white'
-                                  : 'border-neutral-800 text-neutral-400'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="radio"
-                                  name="pg"
-                                  value={gw.id}
-                                  checked={checkoutData.paymentGateway === gw.id}
-                                  onChange={() => setCheckoutData({ ...checkoutData, paymentGateway: gw.id })}
-                                  className="accent-white"
-                                />
-                                <span>{gw.name.split('(')[0]}</span>
-                              </div>
-                              <span className="text-[9px] text-neutral-500">{gw.badge}</span>
-                            </label>
-                          ))}
-                      </div>
-                    </div>
-
-                    {/* Calculations */}
                     <div className="border border-neutral-900 p-4 space-y-2 font-mono text-xs">
                       <div className="flex justify-between text-neutral-500">
-                        <span>SUBTOTAL:</span>
+                        <span>قيمة المنتجات:</span>
                         <span>{cartSubtotal} EGP</span>
                       </div>
                       <div className="flex justify-between text-neutral-500">
-                        <span>COURIER ({activeCourier.name}):</span>
+                        <span>الشحن ({activeCourier.name.split(' ')[0]}):</span>
                         <span>{calculatedShippingCost} EGP</span>
                       </div>
                       <div className="flex justify-between text-white font-bold border-t border-neutral-900 pt-2">
-                        <span>TOTAL DUE:</span>
+                        <span>المطلوب تحصيله كاش عند الاستلام:</span>
                         <span>{cartSubtotal + calculatedShippingCost} EGP</span>
                       </div>
                     </div>
@@ -2898,26 +1664,24 @@ export default function App() {
                       type="submit"
                       className="w-full py-4 bg-white text-black font-mono text-xs tracking-[0.25em] uppercase font-bold hover:bg-neutral-200 transition cursor-pointer"
                     >
-                      CONFIRM ORDER & DISPATCH
+                      تأكيد الأوردر والشحن (COD)
                     </button>
                   </form>
                 </>
               )}
             </div>
-
-            <div className="p-4 bg-black border-t border-neutral-900 text-[10px] text-neutral-500 text-center font-sans">
-              Ù…Ø¹Ø§ÙŠÙ†Ø© ÙˆÙ‚ÙŠØ§Ø³ Ù…Ø¬Ø§Ù†ÙŠ Ù…Ø¹ Ù…Ù†Ø¯ÙˆØ¨ {activeCourier.name} Ù‚Ø¨Ù„ Ø¯ÙØ¹ Ø«Ù…Ù† Ø§Ù„Ø£ÙˆØ±Ø¯Ø±.
-            </div>
           </div>
         </div>
       )}
 
-      {/* EDITORIAL FOOTER */}
+      {/* الفوتر التحريري */}
       <footer className={`border-t ${themeStyles.border} py-16 font-mono text-xs opacity-70`}>
         <div className="max-w-[1720px] mx-auto px-6 sm:px-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div>
-            <div className="font-serif text-2xl tracking-[0.2em] uppercase mb-1">
-              LOOM âˆž STUDIOS
+            <div className="font-serif text-2xl tracking-[0.2em] uppercase mb-1 flex items-center">
+              <span>LOOM</span>
+              <InfinityLogo className="w-5 h-3 mx-1" />
+              <span>STUDIOS</span>
             </div>
             <div className="text-[10px] tracking-[0.3em] opacity-60 uppercase">
               HEAVYWEIGHT COTTON ATELIER / CAIRO
@@ -2926,14 +1690,14 @@ export default function App() {
 
           <div className="flex flex-wrap gap-8 text-[10px] tracking-[0.25em] uppercase">
             <span>COLLECTION 2026</span>
-            <span>â€¢</span>
+            <span>•</span>
             <span>DOORSTEP TRY-ON GUARANTEE</span>
-            <span>â€¢</span>
+            <span>•</span>
             <span>DISPATCH: {activeCourier.name}</span>
           </div>
 
           <div className="text-[10px] opacity-60 tracking-[0.2em]">
-            Â© 2026 LOOM STUDIOS. ALL RIGHTS RESERVED.
+            © 2026 LOOM STUDIOS. ALL RIGHTS RESERVED.
           </div>
         </div>
       </footer>
